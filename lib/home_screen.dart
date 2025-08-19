@@ -3,9 +3,10 @@ import 'services/league_service.dart';
 import 'models/league.dart';
 import 'league_detail_screen.dart';
 import 'services/auth_service.dart';
+import 'services/user_service.dart'; // Importamos el nuevo servicio
+import 'models/user.dart'; // Importamos el nuevo modelo
 import 'main.dart'; // Para navegar a LoginScreen
 
-// Convertimos HomeScreen a un StatefulWidget para que pueda manejar un estado
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -14,25 +15,97 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Un "Future" que guardará el resultado de la llamada a la API
   late Future<List<League>> _leaguesFuture;
+  late Future<User?> _userFuture; // Futuro para los datos del usuario
   final LeagueService _leagueService = LeagueService();
-  final AuthService _authService = AuthService(); // Instancia del servicio
+  final AuthService _authService = AuthService();
+  final UserService _userService = UserService(); // Instancia del servicio de usuario
 
   @override
   void initState() {
     super.initState();
-    // Hacemos la llamada a la API en cuanto la pantalla se carga
     _leaguesFuture = _leagueService.getMyLeagues();
+    _userFuture = _userService.getMe(); // Cargamos los datos del usuario
   }
 
   Future<void> _handleLogout() async {
     await _authService.logout();
     if (!mounted) return;
-    // Navegamos de vuelta al login y eliminamos todas las rutas anteriores
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const LoginScreen()),
       (Route<dynamic> route) => false,
+    );
+  }
+
+  // Widget que se muestra cuando el usuario NO tiene ligas
+  Widget _buildNoLeaguesView() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.sports_soccer, size: 80, color: Colors.grey),
+            const SizedBox(height: 20),
+            Text(
+              '¡Bienvenido a Fantasy Colegas!',
+              style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Parece que todavía no estás en ninguna liga.',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton.icon(
+              onPressed: () {
+                // TODO: Navegar a la pantalla de "Unirse a Liga"
+              },
+              icon: const Icon(Icons.group_add),
+              label: const Text('Únete a una liga'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                // TODO: Navegar a la pantalla de "Crear Liga"
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('Crea una liga'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Widget que se muestra cuando el usuario SÍ tiene ligas
+  Widget _buildLeaguesListView(List<League> leagues) {
+    return ListView.builder(
+      itemCount: leagues.length,
+      itemBuilder: (context, index) {
+        final league = leagues[index];
+        return ListTile(
+          title: Text(league.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+          subtitle: Text(league.description ?? 'Sin descripción'),
+          leading: const Icon(Icons.shield_outlined),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => LeagueDetailScreen(league: league),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -40,56 +113,141 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mis Ligas'),
+        title: const Text('Fantasy Colegas'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // NUEVO: Botón de cerrar sesión
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _handleLogout,
-            tooltip: 'Cerrar sesión',
-          ),
-        ],
       ),
-      // FutureBuilder se encarga de construir la UI según el estado del Future
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            // --- SECCIÓN 1: PERFIL DE USUARIO ---
+            FutureBuilder<User?>(
+              future: _userFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const DrawerHeader(
+                    decoration: BoxDecoration(color: Colors.deepPurple),
+                    child: Center(child: CircularProgressIndicator(color: Colors.white)),
+                  );
+                } else if (snapshot.hasData && snapshot.data != null) {
+                  final user = snapshot.data!;
+                  return UserAccountsDrawerHeader(
+                    accountName: Text(user.username),
+                    accountEmail: null,
+                    currentAccountPicture: CircleAvatar(
+                      backgroundImage: user.profileImageUrl != null && user.profileImageUrl!.isNotEmpty
+                          ? NetworkImage(user.profileImageUrl!)
+                          : const AssetImage('assets/images/default_profile.png') as ImageProvider,
+                      backgroundColor: Colors.white,
+                    ),
+                    decoration: const BoxDecoration(
+                      color: Colors.deepPurple,
+                    ),
+                  );
+                } else {
+                  return const DrawerHeader(
+                    decoration: BoxDecoration(color: Colors.deepPurple),
+                    child: Text('Error al cargar perfil', style: TextStyle(color: Colors.white)),
+                  );
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('Modificar perfil'),
+              onTap: () {
+                // TODO: Navegar a la pantalla de modificar perfil
+                Navigator.pop(context);
+              },
+            ),
+            const Divider(),
+
+            // --- SECCIÓN 2: LIGAS ---
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Text('Mis Ligas', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+            FutureBuilder<List<League>>(
+              future: _leaguesFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                  return Column(
+                    children: snapshot.data!.map((league) {
+                      return ListTile(
+                        // REVERTIDO: Volvemos a usar un icono estático
+                        leading: const Icon(Icons.shield),
+                        title: Text(league.name),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => LeagueDetailScreen(league: league),
+                            ),
+                          );
+                        },
+                      );
+                    }).toList(),
+                  );
+                }
+                // Si no hay ligas, no mostramos nada en esta sección
+                return const SizedBox.shrink();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.group_add),
+              title: const Text('Únete a una liga'),
+              onTap: () {
+                // TODO: Navegar a la pantalla de unirse a liga
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.add_circle_outline),
+              title: const Text('Crea una liga'),
+              onTap: () {
+                // TODO: Navegar a la pantalla de crear liga
+                Navigator.pop(context);
+              },
+            ),
+            const Divider(),
+
+            // --- SECCIÓN 3: OPCIONES ---
+            ListTile(
+              leading: const Icon(Icons.feedback),
+              title: const Text('Enviar comentarios'),
+              onTap: () {
+                // TODO: Implementar funcionalidad de feedback
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Cerrar sesión'),
+              onTap: () {
+                Navigator.pop(context);
+                _handleLogout();
+              },
+            ),
+          ],
+        ),
+      ),
       body: FutureBuilder<List<League>>(
         future: _leaguesFuture,
         builder: (context, snapshot) {
-          // MIENTRAS CARGA
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          } 
-          // SI HAY UN ERROR
-          else if (snapshot.hasError) {
+          } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
-          } 
-          // SI TODO FUE BIEN Y HAY DATOS
-          else if (snapshot.hasData) {
+          } else if (snapshot.hasData) {
             final leagues = snapshot.data!;
-            // Construimos una lista que se puede desplazar
-            return ListView.builder(
-              itemCount: leagues.length,
-              itemBuilder: (context, index) {
-                final league = leagues[index];
-                // ListTile es un widget perfecto para filas de una lista
-                return ListTile(
-                  title: Text(league.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text(league.description ?? 'Sin descripción'),
-                  leading: const Icon(Icons.shield_outlined),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        // Le decimos que construya nuestra nueva pantalla
-                        // y le pasamos la liga actual de la lista
-                        builder: (context) => LeagueDetailScreen(league: league),
-                      ),
-                    );
-                  },
-                );
-              },
-            );
+            if (leagues.isEmpty) {
+              return _buildNoLeaguesView();
+            } else {
+              return _buildLeaguesListView(leagues);
+            }
           }
-          // Por si acaso, un estado por defecto
           return const Center(child: Text('No se encontraron ligas.'));
         },
       ),
