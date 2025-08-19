@@ -1,45 +1,89 @@
-import 'dart:convert'; // Para codificar y decodificar JSON
-import 'package:http/http.dart' as http; // El paquete http que instalamos
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  // La URL base de tu API. Recuerda usar 10.0.2.2 para el emulador de Android
+  // --- Implementación del patrón Singleton ---
+  static final AuthService _instance = AuthService._internal();
+  factory AuthService() {
+    return _instance;
+  }
+  AuthService._internal();
+  // -----------------------------------------
+
   final String _baseUrl = 'http://10.0.2.2:8080/api/auth';
+  String? _token; // Token en memoria para la sesión actual
+
+  // NUEVO: Método para obtener el token de la sesión actual o del almacenamiento
+  Future<String?> getToken() async {
+    // Si ya tenemos el token en memoria, lo usamos
+    if (_token != null) return _token;
+
+    // Si no, intentamos cargarlo desde el almacenamiento persistente
+    final prefs = await SharedPreferences.getInstance();
+    _token = prefs.getString('jwt_token');
+    return _token;
+  }
 
   Future<String?> login(String usernameOrEmail, String password) async {
-    // Construimos la URL completa para el endpoint de login
     final url = Uri.parse('$_baseUrl/login');
-
     try {
-      // Hacemos la petición POST a tu backend
       final response = await http.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'usernameOrEmail': usernameOrEmail,
           'password': password,
         }),
       );
 
-      // Comprobamos si la petición fue exitosa (código 200)
       if (response.statusCode == 200) {
-        // Decodificamos la respuesta JSON que nos envía el backend
         final Map<String, dynamic> responseData = json.decode(response.body);
-        // Extraemos el token JWT
-        final String token = responseData['jwt'];
-        print('Login exitoso! Token: $token');
-        return token;
+        _token = responseData['jwt']; // Guardamos el token en memoria
+        print('Login exitoso! Token: $_token');
+        return _token;
       } else {
-        // Si el login falla (ej. contraseña incorrecta), el backend devuelve otro código
         print('Error en el login: ${response.statusCode}');
         print('Respuesta: ${response.body}');
         return null;
       }
     } catch (e) {
-      // Capturamos cualquier error de conexión (ej. el backend no está encendido)
       print('Excepción al intentar hacer login: $e');
       return null;
     }
+  }
+
+  Future<Map<String, dynamic>> register(String username, String email, String password) async {
+    final url = Uri.parse('$_baseUrl/register');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'username': username,
+          'email': email,
+          'password': password,
+        }),
+      );
+      if (response.statusCode == 200) {
+        return {'success': true};
+      } else {
+        try {
+          final errorData = json.decode(response.body);
+          return {'errors': errorData};
+        } catch (e) {
+          return {'error': response.body};
+        }
+      }
+    } catch (e) {
+      return {'error': 'No se pudo conectar al servidor.'};
+    }
+  }
+
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('jwt_token'); // Limpiamos el almacenamiento
+    _token = null; // Limpiamos el token de la memoria
+    print('Sesión cerrada y token eliminado.');
   }
 }

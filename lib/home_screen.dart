@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'services/league_service.dart';
 import 'models/league.dart';
 import 'league_detail_screen.dart';
+import 'services/auth_service.dart';
+import 'main.dart'; // Para navegar a LoginScreen
 
 // Convertimos HomeScreen a un StatefulWidget para que pueda manejar un estado
 class HomeScreen extends StatefulWidget {
@@ -15,6 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Un "Future" que guardará el resultado de la llamada a la API
   late Future<List<League>> _leaguesFuture;
   final LeagueService _leagueService = LeagueService();
+  final AuthService _authService = AuthService(); // Instancia del servicio
 
   @override
   void initState() {
@@ -23,12 +26,30 @@ class _HomeScreenState extends State<HomeScreen> {
     _leaguesFuture = _leagueService.getMyLeagues();
   }
 
+  Future<void> _handleLogout() async {
+    await _authService.logout();
+    if (!mounted) return;
+    // Navegamos de vuelta al login y eliminamos todas las rutas anteriores
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis Ligas'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        // NUEVO: Botón de cerrar sesión
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _handleLogout,
+            tooltip: 'Cerrar sesión',
+          ),
+        ],
       ),
       // FutureBuilder se encarga de construir la UI según el estado del Future
       body: FutureBuilder<List<League>>(
