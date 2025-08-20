@@ -3,6 +3,7 @@ import 'dart:developer';
 import '../../data/models/user.dart';
 import '/data/repositories/user_repository.dart';
 import 'auth_service.dart';
+import 'dart:io';
 
 
 class UserService {
@@ -39,6 +40,17 @@ class UserService {
         } catch (e) {
             log('Error updating user profile (service): $e');
             return false;
+        }
+    }
+
+    Future<User?> uploadProfileImage(File imageFile) async {
+        try {
+            final token = await _authService.getToken();
+            if (token == null) throw Exception('Token not found');
+            return await _userRepository.uploadProfileImage(imageFile, token);
+        } catch (e) {
+            log('Error subiendo imagen de perfil (service): $e');
+            return null;
         }
     }
 }

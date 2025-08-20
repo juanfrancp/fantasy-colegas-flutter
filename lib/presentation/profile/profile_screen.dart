@@ -3,6 +3,9 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:fantasy_colegas_app/data/models/user.dart';
 import 'package:fantasy_colegas_app/domain/services/user_service.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:fantasy_colegas_app/core/config/api_config.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -19,6 +22,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late Future<User?> _userFuture;
   User? _currentUser;
   bool _isLoading = false;
+  File? _selectedImage;
 
   @override
   void initState() {
@@ -135,16 +139,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 CircleAvatar(
                   radius: MediaQuery.of(context).size.width * 0.25,
                   backgroundImage: user.profileImageUrl != null && user.profileImageUrl!.isNotEmpty
-                      ? NetworkImage(user.profileImageUrl!)
+                      ? NetworkImage(ApiConfig.serverUrl + user.profileImageUrl!)
                       : const AssetImage('assets/images/default_profile.png') as ImageProvider,
                   backgroundColor: Colors.grey.shade200,
                 ),
                 const SizedBox(height: 8),
 
                 TextButton.icon(
-                  onPressed: () {
-                    // TODO: Implementar selección de imagen de la galería
-                  },
+                  onPressed: _pickImage,
                   icon: const Icon(Icons.photo_library),
                   label: const Text('Modificar imagen de perfil'),
                 ),
@@ -189,4 +191,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
+  Future<void> _pickImage() async {
+        final ImagePicker picker = ImagePicker();
+        // Abre la galería
+        final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+        if (image != null) {
+            setState(() {
+                _selectedImage = File(image.path);
+            });
+            // Llama inmediatamente al método para subir la imagen
+            _uploadImage();
+        }
+    }
+
+    Future<void> _uploadImage() async {
+        if (_selectedImage == null) return;
+
+        setState(() { _isLoading = true; });
+
+        final updatedUser = await _userService.uploadProfileImage(_selectedImage!);
+
+        setState(() { _isLoading = false; });
+
+        if (mounted) {
+            if (updatedUser != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Imagen de perfil actualizada.'),
+                        backgroundColor: Colors.green,
+                    ),
+                );
+                // Recarga los datos para mostrar la nueva imagen
+                setState(() {
+                    _userFuture = _loadUserData();
+                    _selectedImage = null; // Limpia la selección
+                });
+            } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Error al subir la imagen.'),
+                        backgroundColor: Colors.red,
+                    ),
+                );
+            }
+        }
+    }
 }

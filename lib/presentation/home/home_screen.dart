@@ -7,6 +7,7 @@ import 'package:fantasy_colegas_app/domain/services/user_service.dart';
 import 'package:fantasy_colegas_app/data/models/user.dart';
 import 'package:fantasy_colegas_app/presentation/auth/login_screen.dart';
 import 'package:fantasy_colegas_app/presentation/profile/profile_screen.dart';
+import 'package:fantasy_colegas_app/core/config/api_config.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -136,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     accountEmail: null,
                     currentAccountPicture: CircleAvatar(
                       backgroundImage: user.profileImageUrl != null && user.profileImageUrl!.isNotEmpty
-                          ? NetworkImage(user.profileImageUrl!)
+                          ? NetworkImage(ApiConfig.serverUrl + user.profileImageUrl!)
                           : const AssetImage('assets/images/default_profile.png') as ImageProvider,
                       backgroundColor: Colors.white,
                     ),
