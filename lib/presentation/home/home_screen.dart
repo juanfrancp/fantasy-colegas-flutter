@@ -6,6 +6,7 @@ import 'package:fantasy_colegas_app/domain/services/auth_service.dart';
 import 'package:fantasy_colegas_app/domain/services/user_service.dart';
 import 'package:fantasy_colegas_app/data/models/user.dart';
 import 'package:fantasy_colegas_app/presentation/auth/login_screen.dart';
+import 'package:fantasy_colegas_app/presentation/profile/profile_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -154,9 +155,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ListTile(
               leading: const Icon(Icons.edit),
               title: const Text('Modificar perfil'),
-              onTap: () {
-                // TODO: Navegar a la pantalla de modificar perfil
+              onTap: () async{
                 Navigator.pop(context);
+                await Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                );
+                setState(() {
+                  _userFuture = _userService.getMe();
+                });
               },
             ),
             const Divider(),

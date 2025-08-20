@@ -1,4 +1,4 @@
-
+import 'dart:developer';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/user.dart';
@@ -23,4 +23,30 @@ class UserRepository {
       return null;
     }
   }
+
+  Future<Map<String, dynamic>?> updateUser(String username, String email, String token) async {
+    final url = Uri.parse('${ApiConfig.baseUrl}/users/me');
+    try {
+        final response = await http.put(
+            url,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer $token',
+            },
+            body: json.encode({
+                'username': username,
+                'email': email,
+            }),
+        );
+
+        if (response.statusCode == 200) {
+            return json.decode(response.body) as Map<String, dynamic>;
+        }
+        return null;
+
+    } catch (e) {
+        log("Excepción en UserRepository.updateUser: $e");
+        return null;
+    }
+}
 }
