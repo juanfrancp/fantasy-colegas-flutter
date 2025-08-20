@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'models/league.dart';
-import 'models/user_score.dart'; // Importamos el nuevo modelo
-import 'services/league_service.dart'; // Importamos el servicio
+import 'package:fantasy_colegas_app/data/models/league.dart';
+import 'package:fantasy_colegas_app/data/models/user_score.dart';
+import 'package:fantasy_colegas_app/domain/services/league_service.dart';
 
-// Convertimos la pantalla a un StatefulWidget
 class LeagueDetailScreen extends StatefulWidget {
   final League league;
 
@@ -20,7 +19,6 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
   @override
   void initState() {
     super.initState();
-    // En cuanto la pantalla carga, pedimos el marcador
     _scoreboardFuture = _leagueService.getScoreboard(widget.league.id);
   }
 
@@ -34,7 +32,6 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Sección de detalles (la que ya teníamos)
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
@@ -42,11 +39,7 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
           ),
-
-          // Línea divisoria
           const Divider(),
-
-          // Usamos Expanded para que la lista ocupe el espacio restante
           Expanded(
             child: FutureBuilder<List<UserScore>>(
               future: _scoreboardFuture,
@@ -63,11 +56,11 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
                       final score = scoreboard[index];
                       return ListTile(
                         leading: CircleAvatar(
-                          child: Text('${index + 1}'), // Posición en el ranking
+                          child: Text('${index + 1}'),
                         ),
                         title: Text(score.username),
                         trailing: Text(
-                          '${score.totalPoints.toStringAsFixed(2)} Pts', // Puntos con 2 decimales
+                          '${score.totalPoints.toStringAsFixed(2)} Pts',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       );

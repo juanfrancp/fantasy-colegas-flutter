@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'services/league_service.dart';
-import 'models/league.dart';
-import 'league_detail_screen.dart';
-import 'services/auth_service.dart';
-import 'services/user_service.dart'; // Importamos el nuevo servicio
-import 'models/user.dart'; // Importamos el nuevo modelo
-import 'main.dart'; // Para navegar a LoginScreen
+import 'package:fantasy_colegas_app/domain/services/league_service.dart';
+import 'package:fantasy_colegas_app/data/models/league.dart';
+import 'package:fantasy_colegas_app/presentation/league/league_detail_screen.dart';
+import 'package:fantasy_colegas_app/domain/services/auth_service.dart';
+import 'package:fantasy_colegas_app/domain/services/user_service.dart';
+import 'package:fantasy_colegas_app/data/models/user.dart';
+import 'package:fantasy_colegas_app/presentation/auth/login_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,16 +17,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late Future<List<League>> _leaguesFuture;
-  late Future<User?> _userFuture; // Futuro para los datos del usuario
+  late Future<User?> _userFuture;
   final LeagueService _leagueService = LeagueService();
   final AuthService _authService = AuthService();
-  final UserService _userService = UserService(); // Instancia del servicio de usuario
+  final UserService _userService = UserService();
 
   @override
   void initState() {
     super.initState();
     _leaguesFuture = _leagueService.getMyLeagues();
-    _userFuture = _userService.getMe(); // Cargamos los datos del usuario
+    _userFuture = _userService.getMe();
   }
 
   Future<void> _handleLogout() async {
@@ -37,7 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Widget que se muestra cuando el usuario NO tiene ligas
   Widget _buildNoLeaguesView() {
     return Center(
       child: Padding(
@@ -87,7 +87,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Widget que se muestra cuando el usuario SÍ tiene ligas
   Widget _buildLeaguesListView(List<League> leagues) {
     return ListView.builder(
       itemCount: leagues.length,
@@ -176,7 +175,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   return Column(
                     children: snapshot.data!.map((league) {
                       return ListTile(
-                        // REVERTIDO: Volvemos a usar un icono estático
                         leading: const Icon(Icons.shield),
                         title: Text(league.name),
                         onTap: () {
@@ -191,7 +189,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     }).toList(),
                   );
                 }
-                // Si no hay ligas, no mostramos nada en esta sección
                 return const SizedBox.shrink();
               },
             ),

@@ -1,0 +1,37 @@
+import 'dart:developer';
+import '../../data/models/league.dart';
+import '../../data/models/user_score.dart';
+import '/data/repositories/league_repository.dart';
+import 'auth_service.dart';
+
+
+class LeagueService {
+  final LeagueRepository _leagueRepository = LeagueRepository();
+  final AuthService _authService = AuthService();
+
+  Future<List<League>> getMyLeagues() async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) {
+        throw Exception('Token not found. Invalid session.');
+      }
+      return await _leagueRepository.getMyLeagues(token);
+    } catch (e) {
+      log('Error in getMyLeagues (service): $e');
+      throw Exception('Failed to load leagues');
+    }
+  }
+
+  Future<List<UserScore>> getScoreboard(int leagueId) async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) {
+        throw Exception('Token not found. Invalid session.');
+      }
+      return await _leagueRepository.getScoreboard(leagueId, token);
+    } catch (e) {
+      log('Error in getScoreboard (service): $e');
+      throw Exception('Failed to load scoreboard');
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'services/auth_service.dart';
+import 'package:fantasy_colegas_app/domain/services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -12,7 +12,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController(); // NUEVO
+  final _confirmPasswordController = TextEditingController();
   final AuthService _authService = AuthService();
 
   bool _isLoading = false;
@@ -30,7 +30,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
-    // Validaciones en el lado del cliente
     if (username.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       _showError('Por favor, rellena todos los campos.');
       return;
@@ -71,7 +70,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.of(context).pop(); // Vuelve a la pantalla de login
+      Navigator.of(context).pop();
     } else {
       String errorMessage = "Ocurrió un error inesperado.";
       if (result['error'] != null) {
@@ -91,10 +90,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         title: const Text('Crear Cuenta'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: Center( // Centra el contenido vertical y horizontalmente
+      body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView( // Para evitar que el teclado tape los campos
+          child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -124,7 +123,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   obscureText: true,
                 ),
                 const SizedBox(height: 16.0),
-                // NUEVO: Campo para confirmar la contraseña
                 TextField(
                   controller: _confirmPasswordController,
                   decoration: const InputDecoration(

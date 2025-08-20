@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'home_screen.dart';
-import 'main.dart'; // Para poder navegar a LoginScreen
+import 'package:fantasy_colegas_app/presentation/home/home_screen.dart';
+import 'package:fantasy_colegas_app/presentation/auth/login_screen.dart';
 
 class AuthCheckScreen extends StatefulWidget {
   const AuthCheckScreen({super.key});
@@ -24,12 +24,10 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
     if (!mounted) return;
 
     if (token != null) {
-      // Si hay un token, vamos directamente a la pantalla principal
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } else {
-      // Si no hay token, vamos a la pantalla de login
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
@@ -38,7 +36,6 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Muestra un indicador de carga mientras se verifica el estado de la sesión
     return const Scaffold(
       body: Center(
         child: CircularProgressIndicator(),
