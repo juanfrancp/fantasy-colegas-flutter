@@ -34,4 +34,22 @@ class LeagueService {
       throw Exception('Failed to load scoreboard');
     }
   }
+
+  Future<List<League>> getPublicLeagues() async {
+    final token = await _authService.getToken();
+    if (token == null) throw Exception('Token not found');
+    return await _leagueRepository.getPublicLeagues(token);
+  }
+
+  Future<List<League>> searchLeaguesByName(String name) async {
+    final token = await _authService.getToken();
+    if (token == null) throw Exception('Token not found');
+    return await _leagueRepository.searchLeaguesByName(name, token);
+  }
+
+  Future<League> findLeagueByCode(String code) async {
+    final token = await _authService.getToken();
+    if (token == null) throw Exception('Token not found');
+    return await _leagueRepository.findLeagueByCode(code, token);
+  }
 }

@@ -8,6 +8,7 @@ import 'package:fantasy_colegas_app/data/models/user.dart';
 import 'package:fantasy_colegas_app/presentation/auth/login_screen.dart';
 import 'package:fantasy_colegas_app/presentation/profile/profile_screen.dart';
 import 'package:fantasy_colegas_app/core/config/api_config.dart';
+import 'package:fantasy_colegas_app/presentation/league/join_league_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -62,7 +63,9 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 30),
             ElevatedButton.icon(
               onPressed: () {
-                // TODO: Navegar a la pantalla de "Unirse a Liga"
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const JoinLeagueScreen()),
+                );
               },
               icon: const Icon(Icons.group_add),
               label: const Text('Únete a una liga'),
@@ -203,8 +206,11 @@ class _HomeScreenState extends State<HomeScreen> {
               leading: const Icon(Icons.group_add),
               title: const Text('Únete a una liga'),
               onTap: () {
-                // TODO: Navegar a la pantalla de unirse a liga
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const JoinLeagueScreen()),
+                );
               },
             ),
             ListTile(
