@@ -76,4 +76,52 @@ class LeagueRepository {
       throw Exception('League not found with this code');
     }
   }
+
+  Future<void> joinPublicLeague(String joinCode, String token) async {
+    final url = Uri.parse('$_baseUrl/join-by-code');
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({'joinCode': joinCode}),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to join public league');
+    }
+  }
+
+  Future<void> requestToJoinPrivateLeague(int leagueId, String token) async {
+    final url = Uri.parse('$_baseUrl/$leagueId/request-join');
+    final response = await http.post(
+      url,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to send join request to private league');
+    }
+  }
+
+  Future<List<int>> getMyPendingRequestLeagueIds(String token) async {
+    final url = Uri.parse('$_baseUrl/my-pending-requests');
+    final response = await http.get(url, headers: {'Authorization': 'Bearer $token'});
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.cast<int>().toList();
+    } else {
+      throw Exception('Failed to load pending requests');
+    }
+  }
+
+  Future<void> cancelJoinRequest(int leagueId, String token) async {
+    final url = Uri.parse('$_baseUrl/$leagueId/request-join');
+    final response = await http.delete(
+      url,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode != 204) {
+      throw Exception('Failed to cancel join request');
+    }
+  }
 }

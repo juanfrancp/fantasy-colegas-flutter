@@ -32,6 +32,12 @@ class _HomeScreenState extends State<HomeScreen> {
     _userFuture = _userService.getMe();
   }
 
+  void _loadUserLeagues() {
+    setState(() {
+      _leaguesFuture = _leagueService.getMyLeagues();
+    });
+  }
+
   Future<void> _handleLogout() async {
     await _authService.logout();
     if (!mounted) return;
@@ -62,11 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 30),
             ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const JoinLeagueScreen()),
-                );
-              },
+              onPressed: _navigateToJoinLeagueScreen,
               icon: const Icon(Icons.group_add),
               label: const Text('Únete a una liga'),
               style: ElevatedButton.styleFrom(
@@ -111,6 +113,17 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
     );
+  }
+
+  void _navigateToJoinLeagueScreen() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const JoinLeagueScreen()),
+    );
+
+    if (result == true && mounted) {
+      _loadUserLeagues();
+    }
   }
 
   @override
@@ -207,10 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
               title: const Text('Únete a una liga'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const JoinLeagueScreen()),
-                );
+                _navigateToJoinLeagueScreen();
               },
             ),
             ListTile(

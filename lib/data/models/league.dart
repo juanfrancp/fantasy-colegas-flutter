@@ -5,6 +5,8 @@ class League {
   final String? imageUrl;
   final bool isPrivate;
   final String? joinCode;
+  final int teamSize;
+  final int participantsCount;
 
   League({
     required this.id,
@@ -13,6 +15,8 @@ class League {
     this.imageUrl,
     required this.isPrivate,
     this.joinCode,
+    required this.teamSize,
+    required this.participantsCount,
   });
 
   factory League.fromJson(Map<String, dynamic> json) {
@@ -23,6 +27,8 @@ class League {
       imageUrl: json['imageUrl'],
       isPrivate: json['isPrivate'] ?? false,
       joinCode: json['joinCode'],
+      teamSize: json['teamSize'] ?? 0,
+      participantsCount: json['participantsCount'] ?? 0,
     );
   }
 }

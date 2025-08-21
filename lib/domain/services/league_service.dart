@@ -52,4 +52,28 @@ class LeagueService {
     if (token == null) throw Exception('Token not found');
     return await _leagueRepository.findLeagueByCode(code, token);
   }
+
+  Future<void> joinPublicLeague(String joinCode) async {
+    final token = await _authService.getToken();
+    if (token == null) throw Exception('Token not found');
+    await _leagueRepository.joinPublicLeague(joinCode, token);
+  }
+
+  Future<void> requestToJoinPrivateLeague(int leagueId) async {
+    final token = await _authService.getToken();
+    if (token == null) throw Exception('Token not found');
+    await _leagueRepository.requestToJoinPrivateLeague(leagueId, token);
+  }
+
+  Future<List<int>> getMyPendingRequestLeagueIds() async {
+    final token = await _authService.getToken();
+    if (token == null) throw Exception('Token not found');
+    return await _leagueRepository.getMyPendingRequestLeagueIds(token);
+  }
+
+  Future<void> cancelJoinRequest(int leagueId) async {
+    final token = await _authService.getToken();
+    if (token == null) throw Exception('Token not found');
+    await _leagueRepository.cancelJoinRequest(leagueId, token);
+  }
 }
