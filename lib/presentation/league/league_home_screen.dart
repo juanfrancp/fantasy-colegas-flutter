@@ -14,7 +14,6 @@ class LeagueHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Para que el texto se vea bien, definimos un estilo común.
     const tabTextStyle = TextStyle(fontSize: 11.5);
 
     return DefaultTabController(
@@ -25,11 +24,8 @@ class LeagueHomeScreen extends StatelessWidget {
           title: Text(league.name),
           bottom: TabBar(
             tabAlignment: TabAlignment.fill,
-            // Usamos labelPadding para dar un poco de espacio vertical.
             labelPadding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
             tabs: [
-              // --- CAMBIO PRINCIPAL AQUÍ ---
-              // Reemplazamos 'text' por 'child' para tener más control.
               const Tab(
                 icon: Icon(Icons.home),
                 child: Text('Inicio', style: tabTextStyle),
@@ -38,7 +34,6 @@ class LeagueHomeScreen extends StatelessWidget {
                 icon: Icon(Icons.person),
                 child: Text('Equipo', style: tabTextStyle),
               ),
-              // En los textos largos, el widget Text se encargará de hacer el salto de línea.
               const Tab(
                 icon: Icon(Icons.leaderboard),
                 child: Text('Clasificación', style: tabTextStyle, textAlign: TextAlign.center),
@@ -54,9 +49,9 @@ class LeagueHomeScreen extends StatelessWidget {
             ],
           ),
         ),
-        body: const TabBarView(
+        body: TabBarView(
           children: [
-            HomeTabScreen(),
+            HomeTabScreen(league: league),
             TeamTabScreen(),
             StandingsTabScreen(),
             PlayersTabScreen(),

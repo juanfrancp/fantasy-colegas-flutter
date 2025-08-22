@@ -1,5 +1,8 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:fantasy_colegas_app/data/models/join_request.dart';
+import 'package:fantasy_colegas_app/data/models/user.dart';
+
 import '../../data/models/league.dart';
 import '../../data/models/user_score.dart';
 import '/data/repositories/league_repository.dart';
@@ -112,5 +115,43 @@ class LeagueService {
       log('Error uploading league image (service): $e');
       return false;
     }
+  }
+
+  Future<int> getPendingJoinRequestsCount(int leagueId) async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) {
+        throw Exception('Token not found');
+      }
+      return await _leagueRepository.getPendingJoinRequestsCount(leagueId, token);
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  Future<List<User>> getLeagueMembers(int leagueId) async {
+    final token = await _authService.getToken();
+    if (token == null) {
+      throw Exception('Token not found');
+    }
+    return await _leagueRepository.getLeagueMembers(leagueId, token);
+  }
+
+  Future<List<JoinRequest>> getPendingJoinRequests(int leagueId) async {
+    final token = await _authService.getToken();
+    if (token == null) throw Exception('Token not found');
+    return _leagueRepository.getPendingJoinRequests(leagueId, token);
+  }
+
+  Future<void> acceptJoinRequest(int leagueId, int requestId) async {
+    final token = await _authService.getToken();
+    if (token == null) throw Exception('Token not found');
+    await _leagueRepository.acceptJoinRequest(leagueId, requestId, token);
+  }
+
+  Future<void> rejectJoinRequest(int leagueId, int requestId) async {
+    final token = await _authService.getToken();
+    if (token == null) throw Exception('Token not found');
+    await _leagueRepository.rejectJoinRequest(leagueId, requestId, token);
   }
 }

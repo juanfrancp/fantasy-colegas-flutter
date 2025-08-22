@@ -3,13 +3,6 @@ import 'package:fantasy_colegas_app/presentation/widgets/app_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:fantasy_colegas_app/domain/services/league_service.dart';
 import 'package:fantasy_colegas_app/data/models/league.dart';
-import 'package:fantasy_colegas_app/presentation/league/league_detail_screen.dart';
-import 'package:fantasy_colegas_app/domain/services/auth_service.dart';
-import 'package:fantasy_colegas_app/domain/services/user_service.dart';
-import 'package:fantasy_colegas_app/data/models/user.dart';
-import 'package:fantasy_colegas_app/presentation/auth/login_screen.dart';
-import 'package:fantasy_colegas_app/presentation/profile/profile_screen.dart';
-import 'package:fantasy_colegas_app/core/config/api_config.dart';
 import 'package:fantasy_colegas_app/presentation/league/join_league_screen.dart';
 import 'package:fantasy_colegas_app/presentation/league/create_league_screen.dart';
 

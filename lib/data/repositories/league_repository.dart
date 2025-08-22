@@ -1,5 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:fantasy_colegas_app/data/models/join_request.dart';
+import 'package:fantasy_colegas_app/data/models/user.dart';
+
 import '../models/user_score.dart';
 import 'package:http/http.dart' as http;
 import '../models/league.dart';
@@ -166,6 +169,87 @@ class LeagueRepository {
       return decodedData['imageUrl'];
     } else {
       throw Exception('Failed to upload league image');
+    }
+  }
+
+  Future<int> getPendingJoinRequestsCount(int leagueId, String token) async {
+    final url = Uri.parse('$_baseUrl/$leagueId/requests');
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      // El endpoint devuelve una lista, solo necesitamos saber su tamaño.
+      final List<dynamic> requests = json.decode(response.body);
+      return requests.length;
+    } else {
+      // Si falla (ej. no es admin), lanzamos una excepción que el servicio capturará.
+      throw Exception('Failed to load pending requests');
+    }
+  }
+
+  Future<List<User>> getLeagueMembers(int leagueId, String token) async {
+    final url = Uri.parse('$_baseUrl/$leagueId/members');
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> memberListJson = json.decode(response.body);
+      return memberListJson.map((json) => User.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load league members');
+    }
+  }
+  
+  Future<List<JoinRequest>> getPendingJoinRequests(int leagueId, String token) async {
+    final url = Uri.parse('$_baseUrl/$leagueId/requests');
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> requestsJson = json.decode(response.body);
+      final List<JoinRequest> validRequests = [];
+
+      for (final requestData in requestsJson) {
+        
+        if (requestData is Map<String, dynamic> && requestData['userId'] != null) {
+          validRequests.add(JoinRequest.fromJson(requestData));
+        }
+      }
+      return validRequests;
+    } else {
+      throw Exception('Failed to load join requests');
+    }
+  }
+
+  Future<void> acceptJoinRequest(int leagueId, int requestId, String token) async {
+    final url = Uri.parse('$_baseUrl/$leagueId/requests/$requestId/accept');
+    final response = await http.post(
+      url,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to accept join request');
+    }
+  }
+
+  Future<void> rejectJoinRequest(int leagueId, int requestId, String token) async {
+    final url = Uri.parse('$_baseUrl/$leagueId/requests/$requestId/reject');
+    final response = await http.post(
+      url,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to reject join request');
     }
   }
 }
