@@ -11,8 +11,6 @@ import 'package:fantasy_colegas_app/core/config/api_config.dart';
 import 'package:fantasy_colegas_app/presentation/league/join_league_screen.dart';
 import 'package:fantasy_colegas_app/presentation/league/create_league_screen.dart';
 
-
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -45,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const LoginScreen()),
-      (Route<dynamic> route) => false,
+          (Route<dynamic> route) => false,
     );
   }
 
@@ -131,9 +129,10 @@ class _HomeScreenState extends State<HomeScreen> {
       MaterialPageRoute(builder: (context) => const CreateLeagueScreen()),
     );
     if (result == true && mounted) {
-      _loadUserLeagues(); // Este es tu método para recargar las ligas
+      _loadUserLeagues();
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -206,8 +205,33 @@ class _HomeScreenState extends State<HomeScreen> {
                 } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                   return Column(
                     children: snapshot.data!.map((league) {
+                      final hasCustomImage = league.image != null && league.image!.isNotEmpty;
+                      final fullImageUrl = hasCustomImage ? '${ApiConfig.serverUrl}${league.image}' : null;
+
                       return ListTile(
-                        leading: const Icon(Icons.shield),
+                        leading: CircleAvatar(
+                          radius: 20,
+                          backgroundColor: Colors.grey.shade200,
+                          child: ClipOval(
+                            child: hasCustomImage
+                              ? Image.network(
+                                  fullImageUrl!,
+                                  width: 40,
+                                  height: 40,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Image.asset(
+                                      'assets/images/default_league.png',
+                                      fit: BoxFit.cover,
+                                    );
+                                  },
+                                )
+                              : Image.asset(
+                                  'assets/images/default_league.png',
+                                  fit: BoxFit.cover,
+                                ),
+                          ),
+                        ),
                         title: Text(league.name),
                         onTap: () {
                           Navigator.pop(context);
