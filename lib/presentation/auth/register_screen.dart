@@ -9,6 +9,9 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  // 1. Clave para gestionar el estado del formulario
+  final _formKey = GlobalKey<FormState>();
+
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -16,46 +19,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final AuthService _authService = AuthService();
 
   bool _isLoading = false;
+  // Variables para controlar la visibilidad de la contraseña
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
 
   void _showError(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
+      SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
     );
   }
 
   Future<void> _handleRegister() async {
-    final username = _usernameController.text.trim();
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
-    final confirmPassword = _confirmPasswordController.text;
-
-    if (username.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
-      _showError('Por favor, rellena todos los campos.');
-      return;
-    }
-    if (!RegExp(r"^[a-zA-Z0-9_-]+$").hasMatch(username)) {
-      _showError('El nombre de usuario solo puede contener letras, números, guiones y guiones bajos.');
-      return;
-    }
-    if (!RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(email)) {
-      _showError('Por favor, introduce un email válido.');
-      return;
-    }
-    if (password.length < 8) {
-      _showError('La contraseña debe tener al menos 8 caracteres.');
-      return;
-    }
-    if (password != confirmPassword) {
-      _showError('Las contraseñas no coinciden.');
-      return;
+    // 2. Usamos la clave del formulario para validar todos los campos a la vez
+    if (!_formKey.currentState!.validate()) {
+      return; // Si la validación falla, no hacemos nada.
     }
 
     setState(() {
       _isLoading = true;
     });
 
-    final result = await _authService.register(username, email, password);
+    final result = await _authService.register(
+      _usernameController.text.trim(),
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
 
     setState(() {
       _isLoading = false;
@@ -72,13 +61,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       Navigator.of(context).pop();
     } else {
-      String errorMessage = "Ocurrió un error inesperado.";
-      if (result['error'] != null) {
-        errorMessage = result['error'];
-      } else if (result['errors'] != null) {
-        final errors = result['errors'] as Map<String, dynamic>;
-        errorMessage = errors.entries.map((e) => e.value).join('\n');
-      }
+      String errorMessage = result['error'] ?? "Ocurrió un error inesperado.";
       _showError(errorMessage);
     }
   }
@@ -86,60 +69,152 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Crear Cuenta'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
+      appBar: AppBar(title: const Text('Crear Cuenta')),
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+        // 3. Envolvemos todo en un Form
+        child: Form(
+          key: _formKey,
           child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                TextField(
+                // --- Campo de Nombre de Usuario ---
+                TextFormField(
                   controller: _usernameController,
                   decoration: const InputDecoration(
                     labelText: 'Nombre de usuario',
+                    prefixIcon: Icon(Icons.person_outline),
                     border: OutlineInputBorder(),
                   ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'El nombre de usuario es obligatorio.';
+                    }
+                    if (value.length < 3) {
+                      return 'Debe tener al menos 3 caracteres.';
+                    }
+                    if (value.length > 25) {
+                      return 'No puede tener más de 25 caracteres.';
+                    }
+                    if (!RegExp(r"^[a-zA-Z0-9_-]+$").hasMatch(value)) {
+                      return 'Solo letras, números, guiones y guiones bajos.';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16.0),
-                TextField(
+
+                // --- Campo de Email ---
+                TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(
                     labelText: 'Email',
+                    prefixIcon: Icon(Icons.email_outlined),
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'El email es obligatorio.';
+                    }
+                    if (!RegExp(
+                      r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+                    ).hasMatch(value)) {
+                      return 'Introduce un email válido.';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16.0),
-                TextField(
+
+                // --- Campo de Contraseña ---
+                TextFormField(
                   controller: _passwordController,
-                  decoration: const InputDecoration(
+                  obscureText: !_isPasswordVisible,
+                  decoration: InputDecoration(
                     labelText: 'Contraseña',
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isPasswordVisible
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () => setState(
+                        () => _isPasswordVisible = !_isPasswordVisible,
+                      ),
+                    ),
                   ),
-                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'La contraseña es obligatoria.';
+                    }
+                    if (value.length < 6) {
+                      // Ajustado a la validación del backend
+                      return 'Debe tener al menos 6 caracteres.';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16.0),
-                TextField(
+
+                // --- Campo de Confirmar Contraseña ---
+                TextFormField(
                   controller: _confirmPasswordController,
-                  decoration: const InputDecoration(
+                  obscureText: !_isConfirmPasswordVisible,
+                  decoration: InputDecoration(
                     labelText: 'Confirmar Contraseña',
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isConfirmPasswordVisible
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () => setState(
+                        () => _isConfirmPasswordVisible =
+                            !_isConfirmPasswordVisible,
+                      ),
+                    ),
                   ),
-                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Confirma tu contraseña.';
+                    }
+                    if (value != _passwordController.text) {
+                      return 'Las contraseñas no coinciden.';
+                    }
+                    return null;
+                  },
                 ),
-                const SizedBox(height: 24.0),
+                const SizedBox(height: 32.0),
+
+                // --- Botón de Registro ---
                 ElevatedButton(
                   onPressed: _isLoading ? null : _handleRegister,
                   style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Registrarse'),
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Crear Cuenta',
+                          style: TextStyle(fontSize: 16),
+                        ),
                 ),
               ],
             ),
