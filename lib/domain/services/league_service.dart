@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 import '../../data/models/league.dart';
 import '../../data/models/user_score.dart';
 import '/data/repositories/league_repository.dart';
@@ -75,5 +76,41 @@ class LeagueService {
     final token = await _authService.getToken();
     if (token == null) throw Exception('Token not found');
     await _leagueRepository.cancelJoinRequest(leagueId, token);
+  }
+
+  Future<League?> createLeague({
+    required String name,
+    String? description,
+    required int teamSize,
+    required bool isPrivate,
+  }) async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) {
+        throw Exception('Token not found. Invalid session.');
+      }
+      final league = await _leagueRepository.createLeague(name, description, teamSize, isPrivate, token);
+      return league;
+    } catch (e) {
+      log('Error creating league (service): $e');
+      return null;
+    }
+  }
+
+  Future<bool> uploadLeagueImage({
+    required String leagueId,
+    required File imageFile,
+  }) async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) {
+        throw Exception('Token not found. Invalid session.');
+      }
+      await _leagueRepository.uploadLeagueImage(leagueId, imageFile, token);
+      return true;
+    } catch (e) {
+      log('Error uploading league image (service): $e');
+      return false;
+    }
   }
 }

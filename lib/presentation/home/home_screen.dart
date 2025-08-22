@@ -9,6 +9,8 @@ import 'package:fantasy_colegas_app/presentation/auth/login_screen.dart';
 import 'package:fantasy_colegas_app/presentation/profile/profile_screen.dart';
 import 'package:fantasy_colegas_app/core/config/api_config.dart';
 import 'package:fantasy_colegas_app/presentation/league/join_league_screen.dart';
+import 'package:fantasy_colegas_app/presentation/league/create_league_screen.dart';
+
 
 
 class HomeScreen extends StatefulWidget {
@@ -77,9 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: () {
-                // TODO: Navegar a la pantalla de "Crear Liga"
-              },
+              onPressed: _navigateToCreateLeagueScreen,
               icon: const Icon(Icons.add),
               label: const Text('Crea una liga'),
               style: ElevatedButton.styleFrom(
@@ -123,6 +123,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (result == true && mounted) {
       _loadUserLeagues();
+    }
+  }
+
+  void _navigateToCreateLeagueScreen() async {
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const CreateLeagueScreen()),
+    );
+    if (result == true && mounted) {
+      _loadUserLeagues(); // Este es tu método para recargar las ligas
     }
   }
 
@@ -227,8 +236,8 @@ class _HomeScreenState extends State<HomeScreen> {
               leading: const Icon(Icons.add_circle_outline),
               title: const Text('Crea una liga'),
               onTap: () {
-                // TODO: Navegar a la pantalla de crear liga
                 Navigator.pop(context);
+                _navigateToCreateLeagueScreen();
               },
             ),
             const Divider(),

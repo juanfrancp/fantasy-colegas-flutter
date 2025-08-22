@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import '../models/user_score.dart';
 import 'package:http/http.dart' as http;
 import '../models/league.dart';
@@ -122,6 +123,49 @@ class LeagueRepository {
     );
     if (response.statusCode != 204) {
       throw Exception('Failed to cancel join request');
+    }
+  }
+
+  Future<League> createLeague(String name, String? description, int teamSize, bool isPrivate, String token) async {
+    final url = Uri.parse(_baseUrl);
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: json.encode({
+        'name': name,
+        'description': description,
+        'teamSize': teamSize,
+        'isPrivate': isPrivate,
+      }),
+    );
+
+    if (response.statusCode == 201) { 
+      return League.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to create league');
+    }
+  }
+
+  Future<String> uploadLeagueImage(String leagueId, File imageFile, String token) async {
+    final url = Uri.parse('$_baseUrl/$leagueId/upload-image');
+    final request = http.MultipartRequest('POST', url)
+      ..headers['Authorization'] = 'Bearer $token'
+      ..files.add(await http.MultipartFile.fromPath(
+        'image',
+        imageFile.path,
+      ));
+
+    final response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseData = await response.stream.bytesToString();
+      final decodedData = json.decode(responseData);
+      return decodedData['imageUrl'];
+    } else {
+      throw Exception('Failed to upload league image');
     }
   }
 }
