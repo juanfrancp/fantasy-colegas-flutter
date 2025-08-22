@@ -1,4 +1,5 @@
 
+import 'package:fantasy_colegas_app/core/config/api_config.dart';
 import 'package:flutter/material.dart';
 import '../../../data/models/league.dart';
 import '../../../domain/services/league_service.dart';
@@ -20,6 +21,7 @@ class LeagueJoinDialog extends StatefulWidget {
   @override
   State<LeagueJoinDialog> createState() => _LeagueJoinDialogState();
 }
+
 
 class _LeagueJoinDialogState extends State<LeagueJoinDialog> {
   final LeagueService _leagueService = LeagueService();
@@ -106,65 +108,84 @@ class _LeagueJoinDialogState extends State<LeagueJoinDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final hasCustomImage = widget.league.image != null && widget.league.image!.isNotEmpty;
+    final String? fullImageUrl = hasCustomImage
+        ? '${ApiConfig.serverUrl}${widget.league.image}'
+        : null;
+
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-      contentPadding: EdgeInsets.zero,
+      contentPadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       content: SizedBox(
         width: MediaQuery.of(context).size.width,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(15.0),
-                  topRight: Radius.circular(15.0),
-                ),
-                child: Image.asset(
-                  'assets/images/default_league.png',
-                  height: 150,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
+              CircleAvatar(
+                radius: 50,
+                backgroundColor: Colors.grey.shade200,
+                child: ClipOval(
+                  child: hasCustomImage
+                      ? Image.network(
+                          fullImageUrl!,
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                              'assets/images/default_league.png',
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        )
+                      : Image.asset(
+                          'assets/images/default_league.png',
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            widget.league.name,
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-                          ),
+              const SizedBox(height: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.league.name,
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
                         ),
-                        const SizedBox(width: 8),
-                        if (widget.league.isPrivate)
-                          const Tooltip(
-                            message: 'Liga Privada',
-                            child: Icon(Icons.lock, color: Colors.grey),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      widget.league.description ?? 'No hay descripción disponible.',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildInfoColumn('Miembros', '${widget.league.participantsCount}'),
-                        _buildInfoColumn('Tamaño Equipo', '${widget.league.teamSize}'),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                      const SizedBox(width: 8),
+                      if (widget.league.isPrivate)
+                        const Tooltip(
+                          message: 'Liga Privada',
+                          child: Icon(Icons.lock, color: Colors.grey),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    widget.league.description ?? 'No hay descripción disponible.',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildInfoColumn('Miembros', '${widget.league.participantsCount}'),
+                      _buildInfoColumn('Tamaño Equipo', '${widget.league.teamSize}'),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),

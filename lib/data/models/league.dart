@@ -2,7 +2,7 @@ class League {
   final int id;
   final String name;
   final String? description;
-  final String? imageUrl;
+  final String? image;
   final bool isPrivate;
   final String? joinCode;
   final int teamSize;
@@ -12,7 +12,7 @@ class League {
     required this.id,
     required this.name,
     this.description,
-    this.imageUrl,
+    this.image,
     required this.isPrivate,
     this.joinCode,
     required this.teamSize,
@@ -24,11 +24,11 @@ class League {
       id: json['id'],
       name: json['name'],
       description: json['description'],
-      imageUrl: json['imageUrl'],
+      image: json['image'],
       isPrivate: json['isPrivate'] ?? false,
       joinCode: json['joinCode'],
       teamSize: json['teamSize'] ?? 0,
-      participantsCount: json['participantsCount'] ?? 0,
+      participantsCount: json['numberOfPlayers'] ?? 0,
     );
   }
 }
