@@ -197,4 +197,16 @@ class LeagueService {
       return e.toString().replaceFirst('Exception: ', '');
     }
   }
+
+  Future<bool> deleteLeague(int leagueId) async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) throw Exception('Token not found');
+      await _leagueRepository.deleteLeague(leagueId, token);
+      return true;
+    } catch (e) {
+      log('Error deleting league: $e');
+      return false;
+    }
+  }
 }

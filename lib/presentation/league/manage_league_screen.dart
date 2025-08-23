@@ -4,6 +4,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:fantasy_colegas_app/data/models/league.dart';
 import 'package:fantasy_colegas_app/domain/services/league_service.dart';
 import 'package:fantasy_colegas_app/core/config/api_config.dart';
+import 'package:fantasy_colegas_app/presentation/home/home_screen.dart';
+import 'widgets/delete_league_dialog.dart';
 
 class ManageLeagueScreen extends StatefulWidget {
   final League league;
@@ -98,7 +100,6 @@ class _ManageLeagueScreenState extends State<ManageLeagueScreen> {
     setState(() { _isLoading = true; });
 
     String? imageUrl = widget.league.image;
-
     if (_selectedImage != null) {
       final newImageUrl = await _leagueService.uploadLeagueImage(
         leagueId: widget.league.id.toString(),
@@ -131,6 +132,40 @@ class _ManageLeagueScreenState extends State<ManageLeagueScreen> {
           const SnackBar(content: Text('Error al actualizar la liga.'), backgroundColor: Colors.red),
         );
       }
+    }
+  }
+  
+  Future<void> _showDeleteConfirmation() async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const DeleteLeagueConfirmationDialog(),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    setState(() { _isLoading = true; });
+    final success = await _leagueService.deleteLeague(widget.league.id);
+    
+    if (!mounted) return;
+    
+    setState(() { _isLoading = false; });
+
+    if (success) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Liga eliminada con éxito.'), backgroundColor: Colors.green),
+      );
+      navigator.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        (route) => false,
+      );
+    } else {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Error al eliminar la liga.'), backgroundColor: Colors.red),
+      );
     }
   }
 
@@ -201,6 +236,18 @@ class _ManageLeagueScreenState extends State<ManageLeagueScreen> {
                     value: _isPrivate,
                     onChanged: _onPrivacyChanged,
                   ),
+                  
+                  const SizedBox(height: 32),
+                  const Divider(color: Colors.red),
+                  const SizedBox(height: 16),
+                  TextButton.icon(
+                    onPressed: _showDeleteConfirmation,
+                    icon: const Icon(Icons.delete_forever),
+                    label: const Text('Eliminar Liga'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.red,
+                    ),
+                  )
                 ],
               ),
             ),
