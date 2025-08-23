@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:fantasy_colegas_app/core/config/api_config.dart';
-
 import 'package:fantasy_colegas_app/data/models/league.dart';
 import 'package:fantasy_colegas_app/domain/services/league_service.dart';
 import 'package:fantasy_colegas_app/presentation/league/widgets/league_join_dialog.dart';
@@ -25,7 +24,6 @@ class _JoinLeagueScreenState extends State<JoinLeagueScreen> {
   List<int> _myLeagueIds = [];
   List<int> _pendingRequestLeagueIds = [];
   bool _actionTaken = false;
-
 
   @override
   void initState() {
@@ -164,21 +162,23 @@ class _JoinLeagueScreenState extends State<JoinLeagueScreen> {
       ),
     ).then((result) {
       if (result == true) {
-        _actionTaken = true;
+        setState(() {
+          _actionTaken = true;
+        });
         _loadInitialData();
       }
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
+    // --- CORRECCIÓN DEL PopScope ---
+    // Ahora interceptamos el gesto de "atrás" y devolvemos nuestro valor.
     return PopScope(
-      canPop: true,
-      onPopInvokedWithResult: (bool didPop, dynamic result) {
-        if (!didPop) {
-          Navigator.of(context).pop(_actionTaken);
-        }
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        Navigator.of(context).pop(_actionTaken);
       },
       child: Scaffold(
         appBar: AppBar(
@@ -210,7 +210,6 @@ class _JoinLeagueScreenState extends State<JoinLeagueScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-
               Expanded(
                 child: _isLoading
                     ? const Center(child: CircularProgressIndicator())
@@ -220,7 +219,6 @@ class _JoinLeagueScreenState extends State<JoinLeagueScreen> {
                             itemCount: _leagues.length,
                             itemBuilder: (context, index) {
                               final league = _leagues[index];
-
                               final hasCustomImage = league.image != null && league.image!.isNotEmpty;
                               final fullImageUrl = hasCustomImage ? '${ApiConfig.serverUrl}${league.image}' : null;
 

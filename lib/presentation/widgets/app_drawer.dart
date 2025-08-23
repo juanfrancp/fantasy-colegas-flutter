@@ -196,6 +196,11 @@ class _AppDrawerState extends State<AppDrawer> {
           const Divider(),
 
           ListTile(
+            leading: const Icon(Icons.email_rounded),
+            title: const Text('Envia tus comentarios.'),
+          ),
+
+          ListTile(
             leading: const Icon(Icons.logout),
             title: const Text('Cerrar sesión'),
             onTap: _handleLogout,

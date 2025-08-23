@@ -281,4 +281,22 @@ class LeagueRepository {
       throw Exception('Failed to load league details');
     }
   }
+
+  Future<void> leaveLeague(int leagueId, String token) async {
+    final url = Uri.parse('$_baseUrl/$leagueId/leave');
+    final response = await http.delete(
+      url,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    // --- CORRECCIÓN AQUÍ ---
+    // Comprobamos si el código de estado NO está en el rango de éxito (200-299).
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      // Si es un error, intentamos decodificar el cuerpo para obtener el mensaje.
+      final errorBody = json.decode(response.body);
+      throw Exception(errorBody['message'] ?? 'Error al abandonar la liga');
+    }
+    // Si el código es 200, 204, o cualquier otro 2xx, simplemente consideramos
+    // que la operación fue exitosa y no hacemos nada más, evitando el error de parseo.
+  }
 }

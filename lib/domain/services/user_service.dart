@@ -24,32 +24,32 @@ class UserService {
   }
 
   Future<bool> updateProfile({required String username, required String email}) async {
-        try {
-            final token = await _authService.getToken();
-            if (token == null) throw Exception('Token not found');
+    try {
+        final token = await _authService.getToken();
+        if (token == null) throw Exception('Token not found');
 
-            final response = await _userRepository.updateUser(username, email, token);
+        final response = await _userRepository.updateUser(username, email, token);
 
-            if (response != null && response['newJwt'] != null) {
-                final newJwt = response['newJwt'] as String;
-                await _authService.saveToken(newJwt);
-                return true;
-            }
-            return false;
-        } catch (e) {
-            log('Error updating user profile (service): $e');
-            return false;
+        if (response != null && response['newJwt'] != null) {
+            final newJwt = response['newJwt'] as String;
+            await _authService.saveToken(newJwt);
+            return true;
         }
+        return false;
+    } catch (e) {
+        log('Error updating user profile (service): $e');
+        return false;
     }
+  }
 
-    Future<User?> uploadProfileImage(File imageFile) async {
-        try {
-            final token = await _authService.getToken();
-            if (token == null) throw Exception('Token not found');
-            return await _userRepository.uploadProfileImage(imageFile, token);
-        } catch (e) {
-            log('Error subiendo imagen de perfil (service): $e');
-            return null;
-        }
+  Future<User?> uploadProfileImage(File imageFile) async {
+    try {
+        final token = await _authService.getToken();
+        if (token == null) throw Exception('Token not found');
+        return await _userRepository.uploadProfileImage(imageFile, token);
+    } catch (e) {
+        log('Error subiendo imagen de perfil (service): $e');
+        return null;
     }
+  }
 }

@@ -186,4 +186,15 @@ class LeagueService {
       return null;
     }
   }
+
+  Future<String?> leaveLeague(int leagueId) async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) throw Exception('Token not found');
+      await _leagueRepository.leaveLeague(leagueId, token);
+      return null;
+    } catch (e) {
+      return e.toString().replaceFirst('Exception: ', '');
+    }
+  }
 }

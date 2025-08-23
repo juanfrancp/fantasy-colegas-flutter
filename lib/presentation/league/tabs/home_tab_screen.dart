@@ -1,4 +1,6 @@
+import 'package:fantasy_colegas_app/presentation/home/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fantasy_colegas_app/data/models/league.dart';
 import 'package:fantasy_colegas_app/data/models/user.dart';
 import 'package:fantasy_colegas_app/domain/services/user_service.dart';
@@ -84,6 +86,51 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
     }
   }
 
+  Future<void> _leaveLeague() async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Abandonar Liga'),
+        content: const Text('¿Estás seguro de que quieres abandonar esta liga? Esta acción no se puede deshacer.'),
+        actions: [
+          TextButton(
+            child: const Text('Cancelar'),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Abandonar'),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    final errorMessage = await _leagueService.leaveLeague(widget.league.id);
+
+    if (!mounted) return;
+
+    if (errorMessage == null) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Has abandonado la liga.'), backgroundColor: Colors.green),
+      );
+      navigator.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        (route) => false,
+      );
+    } else {
+      messenger.showSnackBar(
+        SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final league = widget.league;
@@ -140,6 +187,34 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
+          
+          if (league.joinCode != null && league.joinCode!.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: () {
+                Clipboard.setData(ClipboardData(text: league.joinCode!));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('¡Código copiado al portapapeles!')),
+                );
+              },
+              child: Tooltip(
+                message: 'Toca para copiar',
+                child: Chip(
+                  avatar: const Icon(Icons.content_copy, size: 16),
+                  label: Text(
+                    league.joinCode!,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+              ),
+            ),
+          ],
+
           const SizedBox(height: 8),
           Text(
             league.description ?? 'Esta liga no tiene descripción.',
@@ -150,7 +225,7 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
           const SizedBox(height: 24),
           const Divider(),
           const SizedBox(height: 16),
-          Text('Miembros de la Liga', style: Theme.of(context).textTheme.titleLarge),
+          Text('Miembros', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 16),
           
           FutureBuilder<List<User>>(
@@ -177,6 +252,8 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
                   final hasMemberImage = member.profileImageUrl != null && member.profileImageUrl!.isNotEmpty;
                   final fullMemberImageUrl = hasMemberImage ? '${ApiConfig.serverUrl}${member.profileImageUrl}' : null;
                   
+                  final bool isMemberAdmin = widget.league.admins.any((admin) => admin.id == member.id);
+
                   return ListTile(
                     leading: CircleAvatar(
                       backgroundImage: hasMemberImage
@@ -184,6 +261,12 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
                           : const AssetImage('assets/images/default_profile.png') as ImageProvider,
                     ),
                     title: Text(member.username),
+                    trailing: isMemberAdmin
+                        ? Tooltip(
+                            message: 'Administrador',
+                            child: Icon(Icons.shield, color: Theme.of(context).primaryColor),
+                          )
+                        : null,
                     onTap: () {
                       showDialog(
                         context: context,
@@ -194,6 +277,15 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
                 },
               );
             },
+          ),
+          const SizedBox(height: 32),
+          TextButton.icon(
+            onPressed: _leaveLeague,
+            icon: const Icon(Icons.exit_to_app),
+            label: const Text('Abandonar Liga'),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
           ),
         ],
       ),

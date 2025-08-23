@@ -52,30 +52,30 @@ class UserRepository {
   }
 
   Future<User?> uploadProfileImage(File imageFile, String token) async {
-        final url = Uri.parse('${ApiConfig.baseUrl}/users/me/profile-image');
-        
-        try {
-            var request = http.MultipartRequest('POST', url);
-            request.headers['Authorization'] = 'Bearer $token';
-            request.files.add(
-                await http.MultipartFile.fromPath(
-                    'image',
-                    imageFile.path,
-                ),
-            );
+      final url = Uri.parse('${ApiConfig.baseUrl}/users/me/profile-image');
+      
+      try {
+          var request = http.MultipartRequest('POST', url);
+          request.headers['Authorization'] = 'Bearer $token';
+          request.files.add(
+              await http.MultipartFile.fromPath(
+                  'image',
+                  imageFile.path,
+              ),
+          );
 
-            var streamedResponse = await request.send();
-            var response = await http.Response.fromStream(streamedResponse);
+          var streamedResponse = await request.send();
+          var response = await http.Response.fromStream(streamedResponse);
 
-            if (response.statusCode == 200) {
-                return User.fromJson(json.decode(response.body));
-            } else {
-                log('Error al subir imagen (repository): ${response.body}');
-                return null;
-            }
-        } catch (e) {
-            log('Excepción en UserRepository.uploadProfileImage: $e');
-            return null;
-        }
-    }
+          if (response.statusCode == 200) {
+              return User.fromJson(json.decode(response.body));
+          } else {
+              log('Error al subir imagen (repository): ${response.body}');
+              return null;
+          }
+      } catch (e) {
+          log('Excepción en UserRepository.uploadProfileImage: $e');
+          return null;
+      }
+  }
 }
