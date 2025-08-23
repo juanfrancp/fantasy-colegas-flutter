@@ -9,7 +9,6 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  // 1. Clave para gestionar el estado del formulario
   final _formKey = GlobalKey<FormState>();
 
   final _usernameController = TextEditingController();
@@ -19,7 +18,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final AuthService _authService = AuthService();
 
   bool _isLoading = false;
-  // Variables para controlar la visibilidad de la contraseña
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
 
@@ -31,9 +29,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _handleRegister() async {
-    // 2. Usamos la clave del formulario para validar todos los campos a la vez
     if (!_formKey.currentState!.validate()) {
-      return; // Si la validación falla, no hacemos nada.
+      return;
     }
 
     setState(() {
@@ -71,7 +68,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Crear Cuenta')),
       body: Center(
-        // 3. Envolvemos todo en un Form
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
@@ -80,7 +76,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                // --- Campo de Nombre de Usuario ---
                 TextFormField(
                   controller: _usernameController,
                   decoration: const InputDecoration(
@@ -105,8 +100,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   },
                 ),
                 const SizedBox(height: 16.0),
-
-                // --- Campo de Email ---
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(
@@ -128,8 +121,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   },
                 ),
                 const SizedBox(height: 16.0),
-
-                // --- Campo de Contraseña ---
                 TextFormField(
                   controller: _passwordController,
                   obscureText: !_isPasswordVisible,
@@ -153,15 +144,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       return 'La contraseña es obligatoria.';
                     }
                     if (value.length < 6) {
-                      // Ajustado a la validación del backend
                       return 'Debe tener al menos 6 caracteres.';
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 16.0),
-
-                // --- Campo de Confirmar Contraseña ---
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: !_isConfirmPasswordVisible,
@@ -192,8 +180,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   },
                 ),
                 const SizedBox(height: 32.0),
-
-                // --- Botón de Registro ---
                 ElevatedButton(
                   onPressed: _isLoading ? null : _handleRegister,
                   style: ElevatedButton.styleFrom(

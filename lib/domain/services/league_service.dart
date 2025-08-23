@@ -100,7 +100,7 @@ class LeagueService {
     }
   }
 
-  Future<bool> uploadLeagueImage({
+  Future<String?> uploadLeagueImage({
     required String leagueId,
     required File imageFile,
   }) async {
@@ -109,11 +109,10 @@ class LeagueService {
       if (token == null) {
         throw Exception('Token not found. Invalid session.');
       }
-      await _leagueRepository.uploadLeagueImage(leagueId, imageFile, token);
-      return true;
+      return await _leagueRepository.uploadLeagueImage(leagueId, imageFile, token);
     } catch (e) {
       log('Error uploading league image (service): $e');
-      return false;
+      return null;
     }
   }
 
@@ -153,5 +152,38 @@ class LeagueService {
     final token = await _authService.getToken();
     if (token == null) throw Exception('Token not found');
     await _leagueRepository.rejectJoinRequest(leagueId, requestId, token);
+  }
+
+  Future<League?> updateLeague(int leagueId, String name, String? description, bool isPrivate, int teamSize, String? imageUrl) async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) throw Exception('Token not found');
+
+      final leagueData = {
+        'name': name,
+        'description': description,
+        'isPrivate': isPrivate,
+        'teamSize': teamSize,
+        'image': imageUrl,
+      };
+
+      final updatedLeagueJson = await _leagueRepository.updateLeague(leagueId, leagueData, token);
+      return League.fromJson(updatedLeagueJson);
+    } catch (e) {
+      log('Error updating league: $e');
+      return null;
+    }
+  }
+
+  Future<League?> getLeagueById(int leagueId) async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) throw Exception('Token not found');
+      final leagueJson = await _leagueRepository.getLeagueById(leagueId, token);
+      return League.fromJson(leagueJson);
+    } catch (e) {
+      log('Error getting league by id: $e');
+      return null;
+    }
   }
 }

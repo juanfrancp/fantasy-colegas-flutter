@@ -32,7 +32,6 @@ class UserService {
 
             if (response != null && response['newJwt'] != null) {
                 final newJwt = response['newJwt'] as String;
-                // Guarda el nuevo token
                 await _authService.saveToken(newJwt);
                 return true;
             }

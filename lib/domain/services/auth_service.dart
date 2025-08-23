@@ -43,9 +43,9 @@ class AuthService {
   }
 
   Future<void> saveToken(String token) async {
-        _token = token; // Actualiza el token en memoria
+        _token = token;
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('jwt_token', token); // Guárdalo en el almacenamiento
+        await prefs.setString('jwt_token', token);
         log('Nuevo token guardado.');
     }
 }

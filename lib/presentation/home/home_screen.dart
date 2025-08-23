@@ -87,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => LeagueHomeScreen(league: league),
+                builder: (context) => LeagueHomeScreen(initialLeague: league),
               ),
             );
           },

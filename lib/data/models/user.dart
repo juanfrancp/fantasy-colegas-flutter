@@ -1,8 +1,7 @@
-// lib/data/models/user.dart
 class User {
   final int id;
   final String username;
-  final String? email; // <--- AÑADE ESTA LÍNEA
+  final String? email;
   final String? profileImageUrl;
 
   User({

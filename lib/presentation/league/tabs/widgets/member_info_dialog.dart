@@ -31,7 +31,6 @@ class MemberInfoDialog extends StatelessWidget {
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 24),
-          // Aquí puedes añadir más información en el futuro (puntos, etc.)
           TextButton(
             child: const Text('Cerrar'),
             onPressed: () => Navigator.of(context).pop(),

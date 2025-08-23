@@ -1,7 +1,5 @@
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:fantasy_colegas_app/domain/services/auth_service.dart';
 import 'package:fantasy_colegas_app/presentation/home/home_screen.dart';
 import 'package:fantasy_colegas_app/presentation/auth/register_screen.dart';
@@ -14,28 +12,35 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
 
   bool _isLoading = false;
   bool _rememberMe = false;
+  bool _isPasswordVisible = false;
 
   Future<void> _handleLogin() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
-    final email = _emailController.text;
+    final email = _emailController.text.trim();
     final password = _passwordController.text;
 
     final token = await _authService.login(email, password);
 
+    if (!mounted) return;
+
     setState(() {
       _isLoading = false;
     });
-
-    if (!mounted) return;
 
     if (token != null) {
       if (_rememberMe) {
@@ -43,6 +48,8 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setString('jwt_token', token);
       }
 
+      if (!mounted) return;
+      
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
@@ -59,62 +66,85 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Fantasy Colegas Login'),
+        title: const Text('Iniciar Sesión'),
       ),
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
           child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                TextField(
+                TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(
-                      labelText: 'Email o Usuario',
-                      border: OutlineInputBorder()),
+                    labelText: 'Email o Usuario',
+                    prefixIcon: Icon(Icons.person_outline),
+                    border: OutlineInputBorder(),
+                  ),
                   keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor, introduce tu email o usuario.';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16.0),
-                TextField(
+                TextFormField(
                   controller: _passwordController,
-                  decoration: const InputDecoration(
-                      labelText: 'Contraseña', border: OutlineInputBorder()),
-                  obscureText: true,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Checkbox(
-                      value: _rememberMe,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          _rememberMe = value ?? false;
-                        });
-                      },
+                  obscureText: !_isPasswordVisible,
+                  decoration: InputDecoration(
+                    labelText: 'Contraseña',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(_isPasswordVisible ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
                     ),
-                    const Text('Mantener sesión iniciada'),
-                  ],
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor, introduce tu contraseña.';
+                    }
+                    return null;
+                  },
                 ),
-                const SizedBox(height: 10.0),
+                CheckboxListTile(
+                  value: _rememberMe,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      _rememberMe = value ?? false;
+                    });
+                  },
+                  title: const Text('Mantener sesión iniciada'),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                const SizedBox(height: 16.0),
                 ElevatedButton(
                   onPressed: _isLoading ? null : _handleLogin,
                   style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   child: _isLoading
-                      ? const CircularProgressIndicator(
-                          color: Colors.white,
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white),
                         )
-                      : const Text('Entrar'),
+                      : const Text('Entrar', style: TextStyle(fontSize: 16)),
                 ),
                 const SizedBox(height: 16.0),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (context) => const RegisterScreen()),
+                      MaterialPageRoute(builder: (context) => const RegisterScreen()),
                     );
                   },
                   child: const Text('¿No tienes cuenta? Regístrate'),

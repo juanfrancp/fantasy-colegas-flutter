@@ -20,7 +20,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _emailController = TextEditingController();
 
   late Future<User?> _userFuture;
-  User? _currentUser;
   bool _isLoading = false;
   File? _selectedImage;
 
@@ -35,7 +34,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final user = await _userService.getMe();
       if (user != null) {
         setState(() {
-          _currentUser = user;
           _usernameController.text = user.username;
           _emailController.text = user.email ?? ''; 
         });
@@ -194,14 +192,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _pickImage() async {
         final ImagePicker picker = ImagePicker();
-        // Abre la galería
         final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
         if (image != null) {
             setState(() {
                 _selectedImage = File(image.path);
             });
-            // Llama inmediatamente al método para subir la imagen
             _uploadImage();
         }
     }
@@ -223,10 +219,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         backgroundColor: Colors.green,
                     ),
                 );
-                // Recarga los datos para mostrar la nueva imagen
                 setState(() {
                     _userFuture = _loadUserData();
-                    _selectedImage = null; // Limpia la selección
+                    _selectedImage = null;
                 });
             } else {
                 ScaffoldMessenger.of(context).showSnackBar(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fantasy_colegas_app/data/models/league.dart';
+import 'package:fantasy_colegas_app/domain/services/league_service.dart';
 import 'package:fantasy_colegas_app/presentation/widgets/app_drawer.dart';
 import 'tabs/home_tab_screen.dart';
 import 'tabs/team_tab_screen.dart';
@@ -7,10 +8,36 @@ import 'tabs/standings_tab_screen.dart';
 import 'tabs/players_tab_screen.dart';
 import 'tabs/matches_tab_screen.dart';
 
-class LeagueHomeScreen extends StatelessWidget {
-  final League league;
+class LeagueHomeScreen extends StatefulWidget {
+  final League initialLeague;
 
-  const LeagueHomeScreen({super.key, required this.league});
+  const LeagueHomeScreen({super.key, required this.initialLeague});
+
+  @override
+  State<LeagueHomeScreen> createState() => _LeagueHomeScreenState();
+}
+
+class _LeagueHomeScreenState extends State<LeagueHomeScreen> {
+  late League _currentLeague;
+  final LeagueService _leagueService = LeagueService();
+
+  @override
+  void initState() {
+    super.initState();
+    _currentLeague = widget.initialLeague;
+  }
+
+  Future<void> _refreshLeagueData() async {
+    final updatedLeague = await _leagueService.getLeagueById(_currentLeague.id);
+    if (updatedLeague != null && mounted) {
+      setState(() {
+        _currentLeague = updatedLeague;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Datos de la liga actualizados.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,28 +48,28 @@ class LeagueHomeScreen extends StatelessWidget {
       child: Scaffold(
         drawer: const AppDrawer(),
         appBar: AppBar(
-          title: Text(league.name),
-          bottom: TabBar(
+          title: Text(_currentLeague.name),
+          bottom: const TabBar(
             tabAlignment: TabAlignment.fill,
-            labelPadding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+            labelPadding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
             tabs: [
-              const Tab(
+              Tab(
                 icon: Icon(Icons.home),
                 child: Text('Inicio', style: tabTextStyle),
               ),
-              const Tab(
+              Tab(
                 icon: Icon(Icons.person),
                 child: Text('Equipo', style: tabTextStyle),
               ),
-              const Tab(
+              Tab(
                 icon: Icon(Icons.leaderboard),
                 child: Text('Clasificación', style: tabTextStyle, textAlign: TextAlign.center),
               ),
-              const Tab(
+              Tab(
                 icon: Icon(Icons.run_circle),
                 child: Text('Futbolistas', style: tabTextStyle, textAlign: TextAlign.center),
               ),
-              const Tab(
+              Tab(
                 icon: Icon(Icons.sports_soccer),
                 child: Text('Partidos', style: tabTextStyle),
               ),
@@ -51,11 +78,11 @@ class LeagueHomeScreen extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
-            HomeTabScreen(league: league),
-            TeamTabScreen(),
-            StandingsTabScreen(),
-            PlayersTabScreen(),
-            MatchesTabScreen(),
+            HomeTabScreen(league: _currentLeague, onLeagueUpdated: _refreshLeagueData),
+            const TeamTabScreen(),
+            const StandingsTabScreen(),
+            const PlayersTabScreen(),
+            const MatchesTabScreen(),
           ],
         ),
       ),

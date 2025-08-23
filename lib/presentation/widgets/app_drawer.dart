@@ -56,7 +56,7 @@ class _AppDrawerState extends State<AppDrawer> {
     Navigator.pop(context);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => LeagueHomeScreen(league: league),
+        builder: (context) => LeagueHomeScreen(initialLeague: league),
       ),
     );
   }
@@ -93,7 +93,6 @@ class _AppDrawerState extends State<AppDrawer> {
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          // --- SECCIÓN 1: PERFIL DE USUARIO ---
           FutureBuilder<User?>(
             future: _userFuture,
             builder: (context, snapshot) {
@@ -133,7 +132,6 @@ class _AppDrawerState extends State<AppDrawer> {
           ),
           const Divider(),
 
-          // --- SECCIÓN 2: LIGAS ---
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Text('Mis Ligas', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -197,7 +195,6 @@ class _AppDrawerState extends State<AppDrawer> {
           ),
           const Divider(),
 
-          // --- SECCIÓN 3: OPCIONES ---
           ListTile(
             leading: const Icon(Icons.logout),
             title: const Text('Cerrar sesión'),

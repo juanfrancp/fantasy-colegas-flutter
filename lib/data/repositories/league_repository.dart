@@ -26,7 +26,6 @@ class LeagueRepository {
       final List<dynamic> leaguesJson = json.decode(response.body);
       return leaguesJson.map((json) => League.fromJson(json)).toList();
     } else {
-      // Lanzamos una excepción que el servicio podrá capturar
       throw Exception('Failed to load leagues from repository');
     }
   }
@@ -182,11 +181,9 @@ class LeagueRepository {
     );
 
     if (response.statusCode == 200) {
-      // El endpoint devuelve una lista, solo necesitamos saber su tamaño.
       final List<dynamic> requests = json.decode(response.body);
       return requests.length;
     } else {
-      // Si falla (ej. no es admin), lanzamos una excepción que el servicio capturará.
       throw Exception('Failed to load pending requests');
     }
   }
@@ -218,7 +215,7 @@ class LeagueRepository {
       final List<JoinRequest> validRequests = [];
 
       for (final requestData in requestsJson) {
-        
+
         if (requestData is Map<String, dynamic> && requestData['userId'] != null) {
           validRequests.add(JoinRequest.fromJson(requestData));
         }
@@ -250,6 +247,38 @@ class LeagueRepository {
 
     if (response.statusCode != 200) {
       throw Exception('Failed to reject join request');
+    }
+  }
+
+  Future<Map<String, dynamic>> updateLeague(int leagueId, Map<String, dynamic> leagueData, String token) async {
+    final url = Uri.parse('$_baseUrl/$leagueId');
+    final response = await http.put(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: json.encode(leagueData),
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to update league. Status code: ${response.statusCode}, Body: ${response.body}');
+    }
+  }
+
+  Future<Map<String, dynamic>> getLeagueById(int leagueId, String token) async {
+    final url = Uri.parse('$_baseUrl/$leagueId');
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load league details');
     }
   }
 }

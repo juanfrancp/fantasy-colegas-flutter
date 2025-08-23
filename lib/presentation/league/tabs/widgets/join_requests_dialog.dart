@@ -77,7 +77,6 @@ class _JoinRequestsDialogState extends State<JoinRequestsDialog> {
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 4.0),
                   child: ListTile(
-                    // --- CORRECCIÓN DE LA IMAGEN AQUÍ ---
                     leading: CircleAvatar(
                       backgroundColor: Colors.grey.shade200,
                       child: ClipOval(

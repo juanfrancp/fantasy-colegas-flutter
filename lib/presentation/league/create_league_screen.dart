@@ -57,7 +57,7 @@ class _CreateLeagueScreenState extends State<CreateLeagueScreen> {
               imageFile: _selectedImage!,
             );
 
-            if (!success && mounted) {
+            if (success == null && mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('La liga se creó, pero falló la subida de la imagen.'), backgroundColor: Colors.orange),
               );

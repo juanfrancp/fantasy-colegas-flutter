@@ -59,7 +59,7 @@ class UserRepository {
             request.headers['Authorization'] = 'Bearer $token';
             request.files.add(
                 await http.MultipartFile.fromPath(
-                    'image', // Este es el nombre del campo que espera el backend
+                    'image',
                     imageFile.path,
                 ),
             );
