@@ -310,4 +310,34 @@ class LeagueRepository {
       throw Exception('Error al eliminar la liga');
     }
   }
+
+  Future<void> expelUser(int leagueId, int targetUserId, String token) async {
+    final url = Uri.parse('$_baseUrl/$leagueId/expel/$targetUserId');
+    final response = await http.delete(
+      url,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode >= 300) {
+      final errorBody = json.decode(response.body);
+      throw Exception(errorBody['message'] ?? 'Error al expulsar al usuario');
+    }
+  }
+
+  Future<void> changeUserRole(int leagueId, int targetUserId, String newRole, String token) async {
+    final url = Uri.parse('$_baseUrl/$leagueId/participants/$targetUserId/role');
+    final response = await http.patch(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: json.encode({'newRole': newRole}),
+    );
+
+    if (response.statusCode != 200) {
+      final errorBody = json.decode(response.body);
+      throw Exception(errorBody['message'] ?? 'Error al cambiar el rol del usuario');
+    }
+  }
 }

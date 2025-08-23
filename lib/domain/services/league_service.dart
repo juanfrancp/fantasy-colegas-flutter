@@ -209,4 +209,26 @@ class LeagueService {
       return false;
     }
   }
+
+  Future<String?> expelUser(int leagueId, int targetUserId) async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) throw Exception('Token not found');
+      await _leagueRepository.expelUser(leagueId, targetUserId, token);
+      return null;
+    } catch (e) {
+      return e.toString().replaceFirst('Exception: ', '');
+    }
+  }
+
+  Future<String?> makeUserAdmin(int leagueId, int targetUserId) async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) throw Exception('Token not found');
+      await _leagueRepository.changeUserRole(leagueId, targetUserId, 'ADMIN', token);
+      return null;
+    } catch (e) {
+      return e.toString().replaceFirst('Exception: ', '');
+    }
+  }
 }

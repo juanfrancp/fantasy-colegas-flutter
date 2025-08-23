@@ -1,5 +1,7 @@
 
 import 'dart:developer';
+import 'package:fantasy_colegas_app/data/models/user_score.dart';
+
 import '../../data/models/user.dart';
 import '/data/repositories/user_repository.dart';
 import 'auth_service.dart';
@@ -51,5 +53,15 @@ class UserService {
         log('Error subiendo imagen de perfil (service): $e');
         return null;
     }
+  }
+
+  // TODO: Reemplazar con una llamada real a la API cuando el endpoint exista.
+  Future<List<UserScore>> getUserLastScores(int leagueId, int userId) async {
+    await Future.delayed(const Duration(seconds: 1));
+    return [
+      UserScore(userId: userId, username: 'Admin', totalPoints: 12.5),
+      UserScore(userId: userId, username: 'Admin', totalPoints: 3),
+      UserScore(userId: userId, username: 'Admin', totalPoints: 6.5),
+    ];
   }
 }

@@ -270,7 +270,13 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
                     onTap: () {
                       showDialog(
                         context: context,
-                        builder: (context) => MemberInfoDialog(member: member),
+                        builder: (context) => MemberInfoDialog(
+                          leagueId: widget.league.id,
+                          member: member,
+                          isCurrentUserAdmin: _isAdmin,
+                          isMemberAdmin: isMemberAdmin,
+                          onDataChanged: _loadAllDataForLeague,
+                        ),
                       );
                     },
                   );
