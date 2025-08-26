@@ -1,7 +1,11 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:fantasy_colegas_app/core/config/api_config.dart';
 import 'package:fantasy_colegas_app/data/models/join_request.dart';
+import 'package:fantasy_colegas_app/data/models/player.dart';
 import 'package:fantasy_colegas_app/data/models/user.dart';
+import 'package:http/http.dart' as http;
 
 import '../../data/models/league.dart';
 import '../../data/models/user_score.dart';
@@ -229,6 +233,28 @@ class LeagueService {
       return null;
     } catch (e) {
       return e.toString().replaceFirst('Exception: ', '');
+    }
+  }
+
+  Future<List<Player>> getLeaguePlayers(int leagueId) async {
+    final token = await _authService.getToken();
+    if (token == null) {
+      throw Exception('Token no encontrado');
+    }
+
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/players/league/$leagueId'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+      return data.map((json) => Player.fromJson(json)).toList();
+    } else {
+      throw Exception('Error al cargar los jugadores de la liga');
     }
   }
 }

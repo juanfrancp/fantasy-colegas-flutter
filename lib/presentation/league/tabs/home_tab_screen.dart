@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fantasy_colegas_app/data/models/league.dart';
 import 'package:fantasy_colegas_app/data/models/user.dart';
-import 'package:fantasy_colegas_app/domain/services/user_service.dart';
 import 'package:fantasy_colegas_app/domain/services/league_service.dart';
 import 'package:fantasy_colegas_app/core/config/api_config.dart';
 import 'package:fantasy_colegas_app/presentation/league/manage_league_screen.dart';
@@ -13,11 +12,13 @@ import 'widgets/member_info_dialog.dart';
 class HomeTabScreen extends StatefulWidget {
   final League league;
   final VoidCallback onLeagueUpdated;
+  final bool isAdmin;
 
   const HomeTabScreen({
     super.key,
     required this.league,
     required this.onLeagueUpdated,
+    required this.isAdmin,
   });
 
   @override
@@ -26,51 +27,37 @@ class HomeTabScreen extends StatefulWidget {
 
 class _HomeTabScreenState extends State<HomeTabScreen> {
   final LeagueService _leagueService = LeagueService();
-  final UserService _userService = UserService();
-
-  bool _isAdmin = false;
   int _pendingRequestsCount = 0;
   late Future<List<User>> _membersFuture;
 
   @override
   void initState() {
     super.initState();
-    _loadAllDataForLeague();
+    _loadData();
   }
 
   @override
   void didUpdateWidget(HomeTabScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.league != oldWidget.league) {
-      _loadAllDataForLeague();
+    if (widget.league != oldWidget.league || widget.isAdmin != oldWidget.isAdmin) {
+      _loadData();
     }
   }
 
-  void _loadAllDataForLeague() {
-    _checkAdminStatusAndLoadData();
+  void _loadData() {
+    if (widget.isAdmin) {
+      _loadPendingRequests();
+    }
     setState(() {
       _membersFuture = _leagueService.getLeagueMembers(widget.league.id);
     });
   }
 
-  Future<void> _checkAdminStatusAndLoadData() async {
-    final currentUser = await _userService.getMe();
-    if (currentUser == null || !mounted) return;
-
-    final isAdmin = widget.league.admins.any((admin) => admin.id == currentUser.id);
-    
-    if (isAdmin) {
-      final count = await _leagueService.getPendingJoinRequestsCount(widget.league.id);
-      if (mounted) {
-        setState(() {
-          _isAdmin = true;
-          _pendingRequestsCount = count;
-        });
-      }
-    } else if (mounted) {
+  Future<void> _loadPendingRequests() async {
+    final count = await _leagueService.getPendingJoinRequestsCount(widget.league.id);
+    if (mounted) {
       setState(() {
-        _isAdmin = false;
-        _pendingRequestsCount = 0;
+        _pendingRequestsCount = count;
       });
     }
   }
@@ -82,7 +69,7 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
     );
 
     if (result == true && mounted) {
-      _loadAllDataForLeague();
+      widget.onLeagueUpdated();
     }
   }
 
@@ -142,7 +129,7 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          if (_isAdmin)
+          if (widget.isAdmin)
             Padding(
               padding: const EdgeInsets.only(bottom: 24.0),
               child: Row(
@@ -274,7 +261,7 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
                         builder: (context) => MemberInfoDialog(
                           leagueId: widget.league.id,
                           member: member,
-                          isCurrentUserAdmin: _isAdmin,
+                          isCurrentUserAdmin: widget.isAdmin,
                           isMemberAdmin: isMemberAdmin,
                           onDataChanged: () {
                             widget.onLeagueUpdated();

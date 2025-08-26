@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fantasy_colegas_app/data/models/league.dart';
 import 'package:fantasy_colegas_app/domain/services/league_service.dart';
+import 'package:fantasy_colegas_app/domain/services/user_service.dart';
 import 'package:fantasy_colegas_app/presentation/widgets/app_drawer.dart';
 import 'tabs/home_tab_screen.dart';
 import 'tabs/team_tab_screen.dart';
@@ -20,11 +21,28 @@ class LeagueHomeScreen extends StatefulWidget {
 class _LeagueHomeScreenState extends State<LeagueHomeScreen> {
   late League _currentLeague;
   final LeagueService _leagueService = LeagueService();
+  final UserService _userService = UserService();
+
+  bool _isAdmin = false;
 
   @override
   void initState() {
     super.initState();
     _currentLeague = widget.initialLeague;
+    _checkAdminStatus();
+  }
+
+  Future<void> _checkAdminStatus() async {
+    final currentUser = await _userService.getMe();
+    if (currentUser == null || !mounted) return;
+
+    final isAdmin = _currentLeague.admins.any((admin) => admin.id == currentUser.id);
+    
+    if (mounted) {
+      setState(() {
+        _isAdmin = isAdmin;
+      });
+    }
   }
 
   Future<void> _refreshLeagueData() async {
@@ -33,12 +51,12 @@ class _LeagueHomeScreenState extends State<LeagueHomeScreen> {
       setState(() {
         _currentLeague = updatedLeague;
       });
+      await _checkAdminStatus();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    const tabTextStyle = TextStyle(fontSize: 11.5);
 
     return DefaultTabController(
       length: 5,
@@ -47,38 +65,24 @@ class _LeagueHomeScreenState extends State<LeagueHomeScreen> {
         appBar: AppBar(
           title: Text(_currentLeague.name),
           bottom: const TabBar(
-            tabAlignment: TabAlignment.fill,
-            labelPadding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+            isScrollable: true,
+            tabAlignment: TabAlignment.center,
+            labelPadding: EdgeInsets.symmetric(horizontal: 12.0),
             tabs: [
-              Tab(
-                icon: Icon(Icons.home),
-                child: Text('Inicio', style: tabTextStyle),
-              ),
-              Tab(
-                icon: Icon(Icons.person),
-                child: Text('Equipo', style: tabTextStyle),
-              ),
-              Tab(
-                icon: Icon(Icons.leaderboard),
-                child: Text('Clasificación', style: tabTextStyle, textAlign: TextAlign.center),
-              ),
-              Tab(
-                icon: Icon(Icons.run_circle),
-                child: Text('Futbolistas', style: tabTextStyle, textAlign: TextAlign.center),
-              ),
-              Tab(
-                icon: Icon(Icons.sports_soccer),
-                child: Text('Partidos', style: tabTextStyle),
-              ),
+              Tab(icon: Icon(Icons.home), text: 'Inicio'),
+              Tab(icon: Icon(Icons.person), text: 'Equipo'),
+              Tab(icon: Icon(Icons.leaderboard), text: 'Clasificación'),
+              Tab(icon: Icon(Icons.run_circle), text: 'Futbolistas'),
+              Tab(icon: Icon(Icons.sports_soccer), text: 'Partidos'),
             ],
           ),
         ),
         body: TabBarView(
           children: [
-            HomeTabScreen(league: _currentLeague, onLeagueUpdated: _refreshLeagueData),
+            HomeTabScreen(league: _currentLeague, onLeagueUpdated: _refreshLeagueData, isAdmin: _isAdmin),
             const TeamTabScreen(),
             const StandingsTabScreen(),
-            const PlayersTabScreen(),
+            PlayersTabScreen(league: _currentLeague, isAdmin: _isAdmin),
             const MatchesTabScreen(),
           ],
         ),
