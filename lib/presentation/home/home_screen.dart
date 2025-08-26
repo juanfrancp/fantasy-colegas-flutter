@@ -29,7 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-
   Widget _buildNoLeaguesView() {
     return Center(
       child: Padding(
@@ -124,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Fantasy Colegas'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      drawer: const AppDrawer(), 
+      drawer: AppDrawer(onLeaguesChanged: _loadUserLeagues), 
       body: FutureBuilder<List<League>>(
         future: _leaguesFuture,
         builder: (context, snapshot) {

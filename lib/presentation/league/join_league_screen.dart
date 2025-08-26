@@ -172,11 +172,9 @@ class _JoinLeagueScreenState extends State<JoinLeagueScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // --- CORRECCIÓN DEL PopScope ---
-    // Ahora interceptamos el gesto de "atrás" y devolvemos nuestro valor.
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         Navigator.of(context).pop(_actionTaken);
       },

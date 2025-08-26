@@ -12,7 +12,9 @@ import 'package:fantasy_colegas_app/presentation/league/join_league_screen.dart'
 import 'package:fantasy_colegas_app/presentation/league/create_league_screen.dart';
 
 class AppDrawer extends StatefulWidget {
-  const AppDrawer({super.key});
+  final VoidCallback? onLeaguesChanged;
+
+  const AppDrawer({super.key, this.onLeaguesChanged});
 
   @override
   State<AppDrawer> createState() => _AppDrawerState();
@@ -62,27 +64,38 @@ class _AppDrawerState extends State<AppDrawer> {
   }
 
   void _navigateToCreateLeagueScreen() async {
-     Navigator.pop(context);
-     final result = await Navigator.of(context).push(
-       MaterialPageRoute(builder: (context) => const CreateLeagueScreen()),
-     );
-     if (result == true && mounted) {
-       setState(() {
-         _leaguesFuture = _leagueService.getMyLeagues();
-       });
-     }
-   }
+    final callback = widget.onLeaguesChanged;
+
+    Navigator.pop(context);
+
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (context) => const CreateLeagueScreen()),
+    );
+    if (result == true) {
+      callback?.call();
+      if (mounted) {
+        setState(() {
+          _leaguesFuture = _leagueService.getMyLeagues();
+        });
+      }
+    }
+  }
 
   void _navigateToJoinLeagueScreen() async {
+    final callback = widget.onLeaguesChanged;
+
     Navigator.pop(context);
-    final result = await Navigator.push(
-      context,
+
+    final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (context) => const JoinLeagueScreen()),
     );
-    if (result == true && mounted) {
-      setState(() {
-        _leaguesFuture = _leagueService.getMyLeagues();
-      });
+    if (result == true) {
+      callback?.call();
+      if (mounted) {
+        setState(() {
+          _leaguesFuture = _leagueService.getMyLeagues();
+        });
+      }
     }
   }
 
