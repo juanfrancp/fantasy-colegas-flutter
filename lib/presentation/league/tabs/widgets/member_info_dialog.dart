@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fantasy_colegas_app/data/models/user.dart';
-import 'package:fantasy_colegas_app/data/models/user_score.dart';
 import 'package:fantasy_colegas_app/domain/services/user_service.dart';
 import 'package:fantasy_colegas_app/domain/services/league_service.dart';
 import 'package:fantasy_colegas_app/core/config/api_config.dart';
@@ -29,18 +28,14 @@ class _MemberInfoDialogState extends State<MemberInfoDialog> {
   final UserService _userService = UserService();
   final LeagueService _leagueService = LeagueService();
 
-  late Future<List<UserScore>> _scoresFuture;
   int? _currentUserId;
 
   @override
   void initState() {
     super.initState();
-    _scoresFuture = _userService.getUserLastScores(widget.leagueId, widget.member.id);
     _loadCurrentUserId();
   }
 
-  // --- MÉTODO CORREGIDO ---
-  // Usamos UserService para obtener el usuario actual y su ID.
   Future<void> _loadCurrentUserId() async {
     final currentUser = await _userService.getMe();
     if (mounted && currentUser != null) {
@@ -112,14 +107,9 @@ class _MemberInfoDialogState extends State<MemberInfoDialog> {
           ),
           const SizedBox(height: 16),
           Text(widget.member.username, style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 24),
-          const Text('Últimas Puntuaciones', style: TextStyle(fontWeight: FontWeight.bold)),
-          const Divider(),
-          _buildScoresList(),
         ],
       ),
       actions: [
-        // La condición ahora usa la variable de estado _currentUserId
         if (widget.isCurrentUserAdmin && widget.member.id != _currentUserId)
           _buildAdminActions(),
         TextButton(
@@ -127,26 +117,6 @@ class _MemberInfoDialogState extends State<MemberInfoDialog> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],
-    );
-  }
-
-  Widget _buildScoresList() {
-    return FutureBuilder<List<UserScore>>(
-      future: _scoresFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Padding(padding: EdgeInsets.all(8.0), child: Text('No hay datos de puntuación.'));
-        }
-        final scores = snapshot.data!;
-        return Column(
-          children: scores.map((score) => ListTile(
-            trailing: Text('${score.totalPoints} pts', style: const TextStyle(fontWeight: FontWeight.bold)),
-          )).toList(),
-        );
-      },
     );
   }
 

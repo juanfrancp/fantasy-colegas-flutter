@@ -242,6 +242,7 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
               }
 
               final members = snapshot.data!;
+              members.sort((a, b) => a.username.toLowerCase().compareTo(b.username.toLowerCase()));
               return ListView.separated(
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
@@ -275,7 +276,9 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
                           member: member,
                           isCurrentUserAdmin: _isAdmin,
                           isMemberAdmin: isMemberAdmin,
-                          onDataChanged: _loadAllDataForLeague,
+                          onDataChanged: () {
+                            widget.onLeagueUpdated();
+                          },
                         ),
                       );
                     },

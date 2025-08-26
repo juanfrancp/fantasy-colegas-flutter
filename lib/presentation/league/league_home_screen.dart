@@ -33,9 +33,6 @@ class _LeagueHomeScreenState extends State<LeagueHomeScreen> {
       setState(() {
         _currentLeague = updatedLeague;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Datos de la liga actualizados.')),
-      );
     }
   }
 
