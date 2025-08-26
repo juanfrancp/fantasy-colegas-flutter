@@ -8,7 +8,7 @@ import 'package:fantasy_colegas_app/data/models/user.dart';
 import 'package:http/http.dart' as http;
 
 import '../../data/models/league.dart';
-import '../../data/models/user_score.dart';
+import '../../data/models/user_standings.dart';
 import '/data/repositories/league_repository.dart';
 import 'auth_service.dart';
 
@@ -30,7 +30,7 @@ class LeagueService {
     }
   }
 
-  Future<List<UserScore>> getScoreboard(int leagueId) async {
+  Future<List<UserStandings>> getScoreboard(int leagueId) async {
     try {
       final token = await _authService.getToken();
       if (token == null) {
@@ -255,6 +255,23 @@ class LeagueService {
       return data.map((json) => Player.fromJson(json)).toList();
     } else {
       throw Exception('Error al cargar los jugadores de la liga');
+    }
+  }
+
+    Future<List<UserStandings>> getLeagueStandings(int leagueId) async {
+    final token = await _authService.getToken();
+    if (token == null) throw Exception('Token no encontrado');
+
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/leagues/$leagueId/standings'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+      return data.map((json) => UserStandings.fromJson(json)).toList();
+    } else {
+      throw Exception('Error al cargar la clasificación');
     }
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fantasy_colegas_app/data/models/league.dart';
-import 'package:fantasy_colegas_app/data/models/user_score.dart';
+import 'package:fantasy_colegas_app/data/models/user_standings.dart';
 import 'package:fantasy_colegas_app/domain/services/league_service.dart';
 
 class LeagueDetailScreen extends StatefulWidget {
@@ -13,7 +13,7 @@ class LeagueDetailScreen extends StatefulWidget {
 }
 
 class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
-  late Future<List<UserScore>> _scoreboardFuture;
+  late Future<List<UserStandings>> _scoreboardFuture;
   final LeagueService _leagueService = LeagueService();
 
   @override
@@ -41,7 +41,7 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
           ),
           const Divider(),
           Expanded(
-            child: FutureBuilder<List<UserScore>>(
+            child: FutureBuilder<List<UserStandings>>(
               future: _scoreboardFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {

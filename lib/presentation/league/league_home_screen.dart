@@ -81,7 +81,7 @@ class _LeagueHomeScreenState extends State<LeagueHomeScreen> {
           children: [
             HomeTabScreen(league: _currentLeague, onLeagueUpdated: _refreshLeagueData, isAdmin: _isAdmin),
             const TeamTabScreen(),
-            const StandingsTabScreen(),
+            StandingsTabScreen(league: _currentLeague),
             PlayersTabScreen(league: _currentLeague, isAdmin: _isAdmin),
             const MatchesTabScreen(),
           ],

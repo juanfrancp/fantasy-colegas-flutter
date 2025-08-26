@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:fantasy_colegas_app/data/models/join_request.dart';
 import 'package:fantasy_colegas_app/data/models/user.dart';
 
-import '../models/user_score.dart';
+import '../models/user_standings.dart';
 import 'package:http/http.dart' as http;
 import '../models/league.dart';
 import 'package:fantasy_colegas_app/core/config/api_config.dart';
@@ -30,7 +30,7 @@ class LeagueRepository {
     }
   }
 
-  Future<List<UserScore>> getScoreboard(int leagueId, String token) async {
+  Future<List<UserStandings>> getScoreboard(int leagueId, String token) async {
     final url = Uri.parse('$_baseUrl/$leagueId/scoreboard');
     final response = await http.get(
       url,
@@ -42,7 +42,7 @@ class LeagueRepository {
 
     if (response.statusCode == 200) {
       final List<dynamic> scoreboardJson = json.decode(response.body);
-      return scoreboardJson.map((json) => UserScore.fromJson(json)).toList();
+      return scoreboardJson.map((json) => UserStandings.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load scoreboard from repository');
     }
