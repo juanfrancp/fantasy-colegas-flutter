@@ -80,7 +80,7 @@ class _LeagueHomeScreenState extends State<LeagueHomeScreen> {
         body: TabBarView(
           children: [
             HomeTabScreen(league: _currentLeague, onLeagueUpdated: _refreshLeagueData, isAdmin: _isAdmin),
-            const TeamTabScreen(),
+            TeamTabScreen(league: _currentLeague),
             StandingsTabScreen(league: _currentLeague),
             PlayersTabScreen(league: _currentLeague, isAdmin: _isAdmin),
             const MatchesTabScreen(),
