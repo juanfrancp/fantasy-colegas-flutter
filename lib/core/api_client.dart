@@ -49,7 +49,7 @@ class ApiClient {
       }
   }
 
-  Future<String> multipartPost(String endpoint, File file, String fieldName) async {
+  Future<dynamic> multipartPost(String endpoint, File file, String fieldName) async {
     final url = Uri.parse('$baseUrl/$endpoint');
     final request = http.MultipartRequest('POST', url)
       ..headers.addAll(_authHeaders)
@@ -58,10 +58,12 @@ class ApiClient {
     final response = await request.send();
     final responseBody = await response.stream.bytesToString();
 
-    if (response.statusCode == 200) {
-        return json.decode(responseBody)['imageUrl'];
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (responseBody.isEmpty) return null;
+        return json.decode(responseBody);
     } else {
-        throw ApiException(json.decode(responseBody)['message'] ?? 'Error en la subida', response.statusCode);
+        final errorBody = json.decode(responseBody);
+        throw ApiException(errorBody['message'] ?? 'Error en la subida', response.statusCode);
     }
   }
 

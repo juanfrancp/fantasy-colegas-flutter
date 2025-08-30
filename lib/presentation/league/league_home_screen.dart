@@ -33,16 +33,19 @@ class _LeagueHomeScreenState extends State<LeagueHomeScreen> {
   }
 
   Future<void> _checkAdminStatus() async {
-    final currentUser = await _userService.getMe();
-    if (currentUser == null || !mounted) return;
-
-    final isAdmin =
-        _currentLeague.admins.any((admin) => admin.id == currentUser.id);
-
-    if (mounted) {
+    try {
+      final currentUser = await _userService.getMe();
+      if (!mounted) return;
+      final isAdmin = _currentLeague.admins.any((admin) => admin.id == currentUser.id);
       setState(() {
         _isAdmin = isAdmin;
       });
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isAdmin = false;
+        });
+      }
     }
   }
 

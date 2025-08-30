@@ -38,11 +38,11 @@ class _MemberInfoDialogState extends State<MemberInfoDialog> {
 
   Future<void> _loadCurrentUserId() async {
     final currentUser = await _userService.getMe();
-    if (mounted && currentUser != null) {
-      setState(() {
-        _currentUserId = currentUser.id;
-      });
-    }
+      if (mounted) {
+        setState(() {
+          _currentUserId = currentUser.id;
+        });
+      }
   }
 
   void _showError(String message) {

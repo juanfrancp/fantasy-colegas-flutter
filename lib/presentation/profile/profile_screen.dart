@@ -1,3 +1,4 @@
+// Archivo: lib/presentation/profile/profile_screen.dart
 
 import 'dart:developer';
 import 'package:flutter/material.dart';
@@ -19,7 +20,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
 
-  late Future<User?> _userFuture;
+  late Future<User> _userFuture;
   bool _isLoading = false;
   File? _selectedImage;
 
@@ -29,13 +30,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _userFuture = _loadUserData();
   }
 
-  Future<User?> _loadUserData() async {
+  Future<User> _loadUserData() async {
     try {
       final user = await _userService.getMe();
-      if (user != null) {
+      if (mounted) {
         setState(() {
           _usernameController.text = user.username;
-          _emailController.text = user.email ?? ''; 
+          _emailController.text = user.email ?? '';
         });
       }
       return user;
@@ -43,65 +44,97 @@ class _ProfileScreenState extends State<ProfileScreen> {
       log("Error cargando datos del usuario: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al cargar el perfil: $e')),
+          SnackBar(content: Text('Error al cargar el perfil: ${e.toString().replaceFirst("Exception: ", "")}')),
         );
       }
-      return null;
+      throw Exception('Failed to load user data');
     }
   }
 
   Future<void> _saveChanges() async {
-    final bool? confirm = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirmar cambios'),
-          content: const Text('¿Estás seguro de que quieres guardar los cambios en tu perfil?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancelar'),
-              onPressed: () => Navigator.of(context).pop(false),
-            ),
-            TextButton(
-              child: const Text('Confirmar'),
-              onPressed: () => Navigator.of(context).pop(true),
-            ),
-          ],
-        );
-      },
-    );
+    final messenger = ScaffoldMessenger.of(context);
 
-    if (confirm != true) {
-      return;
-    }
+    final bool? confirm = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Confirmar cambios'),
+            content: const Text('¿Estás seguro de que quieres guardar los cambios en tu perfil?'),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Cancelar'),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+              TextButton(
+                child: const Text('Confirmar'),
+                onPressed: () => Navigator.of(context).pop(true),
+              ),
+            ],
+          );
+        });
+
+    if (!mounted || confirm != true) return;
 
     setState(() { _isLoading = true; });
 
-    final success = await _userService.updateProfile(
-      username: _usernameController.text.trim(),
-      email: _emailController.text.trim(),
-    );
-    
-    setState(() { _isLoading = false; });
-    
-    if (mounted) {
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('¡Perfil actualizado con éxito!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        setState(() {
-          _userFuture = _loadUserData();
-        });
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error al actualizar el perfil.'),
-            backgroundColor: Colors.red,
-          ),
-        );
+    try {
+      await _userService.updateProfile(
+        username: _usernameController.text.trim(),
+        email: _emailController.text.trim(),
+      );
+      
+      messenger.showSnackBar(
+        const SnackBar(content: Text('¡Perfil actualizado con éxito!'), backgroundColor: Colors.green),
+      );
+      
+      setState(() {
+        _userFuture = _loadUserData();
+      });
+
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString().replaceFirst("Exception: ", "")}'), backgroundColor: Colors.red),
+      );
+    } finally {
+      if(mounted) {
+        setState(() { _isLoading = false; });
+      }
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      _selectedImage = File(image.path);
+      await _uploadImage();
+    }
+  }
+
+  Future<void> _uploadImage() async {
+    if (_selectedImage == null) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() { _isLoading = true; });
+
+    try {
+      await _userService.uploadProfileImage(_selectedImage!);
+      
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Imagen de perfil actualizada.'), backgroundColor: Colors.green),
+      );
+      setState(() {
+        _userFuture = _loadUserData();
+        _selectedImage = null;
+      });
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString().replaceFirst("Exception: ", "")}'), backgroundColor: Colors.red),
+      );
+    } finally {
+      if (mounted) {
+        setState(() { _isLoading = false; });
       }
     }
   }
@@ -119,14 +152,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         title: const Text('Modificar Perfil'),
       ),
-      body: FutureBuilder<User?>(
+      body: FutureBuilder<User>( // <-- Cambiado a User (no nullable)
         future: _userFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError || !snapshot.hasData) {
-            return const Center(child: Text('No se pudieron cargar los datos del perfil.'));
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'No se pudieron cargar los datos del perfil.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+            );
           }
 
           final user = snapshot.data!;
@@ -137,19 +179,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 CircleAvatar(
                   radius: MediaQuery.of(context).size.width * 0.25,
                   backgroundImage: user.profileImageUrl != null && user.profileImageUrl!.isNotEmpty
-                      ? NetworkImage(ApiConfig.serverUrl + user.profileImageUrl!)
+                      ? NetworkImage('${ApiConfig.serverUrl}${user.profileImageUrl}')
                       : const AssetImage('assets/images/default_profile.png') as ImageProvider,
                   backgroundColor: Colors.grey.shade200,
                 ),
                 const SizedBox(height: 8),
-
                 TextButton.icon(
                   onPressed: _pickImage,
                   icon: const Icon(Icons.photo_library),
                   label: const Text('Modificar imagen de perfil'),
                 ),
                 const SizedBox(height: 32),
-
                 TextField(
                   controller: _usernameController,
                   decoration: const InputDecoration(
@@ -159,7 +199,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-
                 TextField(
                   controller: _emailController,
                   decoration: const InputDecoration(
@@ -167,10 +206,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.email),
                   ),
-                  readOnly: false,
                 ),
                 const SizedBox(height: 32),
-
                 ElevatedButton(
                   onPressed: _isLoading ? null : _saveChanges,
                   style: ElevatedButton.styleFrom(
@@ -189,48 +226,4 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
-
-  Future<void> _pickImage() async {
-        final ImagePicker picker = ImagePicker();
-        final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-
-        if (image != null) {
-            setState(() {
-                _selectedImage = File(image.path);
-            });
-            _uploadImage();
-        }
-    }
-
-    Future<void> _uploadImage() async {
-        if (_selectedImage == null) return;
-
-        setState(() { _isLoading = true; });
-
-        final updatedUser = await _userService.uploadProfileImage(_selectedImage!);
-
-        setState(() { _isLoading = false; });
-
-        if (mounted) {
-            if (updatedUser != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Imagen de perfil actualizada.'),
-                        backgroundColor: Colors.green,
-                    ),
-                );
-                setState(() {
-                    _userFuture = _loadUserData();
-                    _selectedImage = null;
-                });
-            } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Error al subir la imagen.'),
-                        backgroundColor: Colors.red,
-                    ),
-                );
-            }
-        }
-    }
 }

@@ -82,10 +82,11 @@ class LeagueRepository {
     return League.fromJson(jsonResponse);
   }
 
-  Future<String> uploadLeagueImage(String leagueId, File imageFile, String token) {
-    return ApiClient(baseUrl: ApiConfig.baseUrl, token: token)
+  Future<String> uploadLeagueImage(String leagueId, File imageFile, String token) async {
+    final jsonResponse = await ApiClient(baseUrl: ApiConfig.baseUrl, token: token)
         .multipartPost('leagues/$leagueId/upload-image', imageFile, 'image');
-  }
+    return jsonResponse['imageUrl'];
+}
 
   Future<void> joinPublicLeague(String joinCode, String token) async {
     await _client(token).post('join-by-code', body: {'joinCode': joinCode});
