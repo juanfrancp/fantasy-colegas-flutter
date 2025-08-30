@@ -78,51 +78,73 @@ class _ManageLeagueScreenState extends State<ManageLeagueScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirmar Cambios'),
-        content: const Text('¿Estás seguro de que quieres guardar los cambios?'),
-        actions: [
-          TextButton(
-            child: const Text('Cancelar'),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          ElevatedButton(
-            child: const Text('Guardar'),
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
-      ),
+        context: context,
+        builder: (context) => AlertDialog(
+            title: const Text('Confirmar Cambios'),
+            content: const Text('¿Estás seguro de que quieres guardar los cambios?'),
+            actions: [
+                TextButton(child: const Text('Cancelar'), onPressed: () => Navigator.of(context).pop(false)),
+                ElevatedButton(child: const Text('Guardar'), onPressed: () => Navigator.of(context).pop(true)),
+            ],
+        ),
     );
 
     if (confirmed != true) return;
 
     setState(() { _isLoading = true; });
 
-    String? imageUrl = widget.league.image;
-    if (_selectedImage != null) {
-      final newImageUrl = await _leagueService.uploadLeagueImage(
-        leagueId: widget.league.id.toString(),
-        imageFile: _selectedImage!,
-      );
-      if (newImageUrl != null) {
-        imageUrl = newImageUrl;
-      }
-    }
+    bool teamSizeChanged = widget.league.teamSize != _teamSize.round();
+    bool otherDataChanged = widget.league.name != _nameController.text ||
+                            widget.league.description != _descriptionController.text ||
+                            widget.league.isPrivate != _isPrivate ||
+                            _selectedImage != null;
 
-    final updatedLeague = await _leagueService.updateLeague(
-      widget.league.id,
-      _nameController.text,
-      _descriptionController.text,
-      _isPrivate,
-      _teamSize.round(),
-      imageUrl,
-    );
+    bool success = true;
+    String? finalImageUrl = widget.league.image;
+
+    try {
+      // 1. Si la imagen ha cambiado, la subimos primero.
+      if (_selectedImage != null) {
+        final newImageUrl = await _leagueService.uploadLeagueImage(
+            leagueId: widget.league.id.toString(),
+            imageFile: _selectedImage!,
+        );
+        if (newImageUrl != null) {
+          finalImageUrl = newImageUrl;
+        }
+      }
+
+      // 2. Si el tamaño del equipo ha cambiado, llamamos al endpoint específico.
+      if (teamSizeChanged) {
+        final updatedLeague = await _leagueService.updateLeagueTeamSize(
+          leagueId: widget.league.id,
+          newTeamSize: _teamSize.round(),
+        );
+        if (updatedLeague == null) success = false;
+      }
+
+      // 3. Si otros datos han cambiado (y la operación anterior no ha fallado), actualizamos el resto.
+      if (otherDataChanged && success) {
+        final updatedLeague = await _leagueService.updateLeague(
+          widget.league.id,
+          _nameController.text,
+          _descriptionController.text,
+          _isPrivate,
+          _teamSize.round(), // Se envía el tamaño de equipo por si acaso, aunque la lógica principal ya se ejecutó.
+          finalImageUrl,
+        );
+        if (updatedLeague == null) success = false;
+      }
+
+    } catch (e) {
+      success = false;
+      print("Error guardando cambios: $e");
+    }
 
     setState(() { _isLoading = false; });
 
     if (mounted) {
-      if (updatedLeague != null) {
+      if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('¡Liga actualizada con éxito!'), backgroundColor: Colors.green),
         );

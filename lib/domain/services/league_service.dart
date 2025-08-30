@@ -274,4 +274,29 @@ class LeagueService {
       throw Exception('Error al cargar la clasificación');
     }
   }
+
+  Future<League?> updateLeagueTeamSize({
+    required int leagueId,
+    required int newTeamSize,
+  }) async {
+    final token = await _authService.getToken();
+    if (token == null) throw Exception('Token no encontrado');
+
+    final response = await http.patch( // Usamos PATCH para actualizaciones parciales
+      Uri.parse('${ApiConfig.baseUrl}/leagues/$leagueId/team-size'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({'teamSize': newTeamSize}),
+    );
+
+    if (response.statusCode == 200) {
+      return League.fromJson(json.decode(utf8.decode(response.bodyBytes)));
+    } else {
+      print('Error al actualizar tamaño del equipo: ${response.statusCode}');
+      print(response.body);
+      return null;
+    }
+  }
 }
