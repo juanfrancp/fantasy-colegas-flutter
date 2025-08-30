@@ -32,24 +32,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+    setState(() { _isLoading = true; });
 
-    setState(() {
-      _isLoading = true;
-    });
-
-    final result = await _authService.register(
+    final bool success = await _authService.register(
       _usernameController.text.trim(),
       _emailController.text.trim(),
       _passwordController.text,
     );
 
-    setState(() {
-      _isLoading = false;
-    });
-
     if (!mounted) return;
+    setState(() { _isLoading = false; });
 
-    if (result['success'] == true) {
+    if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('¡Registro completado! Ahora puedes iniciar sesión.'),
@@ -58,8 +52,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       Navigator.of(context).pop();
     } else {
-      String errorMessage = result['error'] ?? "Ocurrió un error inesperado.";
-      _showError(errorMessage);
+      _showError("Error en el registro. El usuario o email pueden ya existir.");
     }
   }
 

@@ -294,8 +294,6 @@ class LeagueService {
     if (response.statusCode == 200) {
       return League.fromJson(json.decode(utf8.decode(response.bodyBytes)));
     } else {
-      print('Error al actualizar tamaño del equipo: ${response.statusCode}');
-      print(response.body);
       return null;
     }
   }

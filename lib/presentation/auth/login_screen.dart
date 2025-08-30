@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fantasy_colegas_app/domain/services/auth_service.dart';
 import 'package:fantasy_colegas_app/presentation/home/home_screen.dart';
 import 'package:fantasy_colegas_app/presentation/auth/register_screen.dart';
@@ -26,30 +25,17 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() { _isLoading = true; });
 
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    final token = await _authService.login(email, password);
+    final bool success = await _authService.login(email, password, rememberMe: _rememberMe);
 
     if (!mounted) return;
+    setState(() { _isLoading = false; });
 
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (token != null) {
-      if (_rememberMe) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('jwt_token', token);
-      }
-
-      if (!mounted) return;
-      
+    if (success) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );

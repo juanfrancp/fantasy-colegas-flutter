@@ -138,7 +138,6 @@ class _ManageLeagueScreenState extends State<ManageLeagueScreen> {
 
     } catch (e) {
       success = false;
-      print("Error guardando cambios: $e");
     }
 
     setState(() { _isLoading = false; });
