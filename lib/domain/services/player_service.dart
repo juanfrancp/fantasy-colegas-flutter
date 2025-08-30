@@ -1,89 +1,56 @@
-import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
-import 'package:fantasy_colegas_app/domain/services/auth_service.dart';
-import 'package:http/http.dart' as http;
-import 'package:fantasy_colegas_app/core/config/api_config.dart';
+import 'package:fantasy_colegas_app/core/api_client.dart';
 import 'package:fantasy_colegas_app/data/models/player.dart';
+import 'package:fantasy_colegas_app/data/repositories/player_repository.dart';
+import 'auth_service.dart';
 
 class PlayerService {
   final AuthService _authService = AuthService();
+  final PlayerRepository _playerRepository = PlayerRepository();
 
-  Future<Player?> createPlayer({
+  Future<T> _executeWithAuth<T>(Future<T> Function(String token) action) async {
+    final token = await _authService.getToken();
+    if (token == null) {
+      throw Exception('Sesión inválida. Por favor, inicia sesión de nuevo.');
+    }
+    try {
+      return await action(token);
+    } on ApiException catch (e) {
+      log('Error de API en PlayerService: ${e.message}');
+      throw Exception(e.message);
+    } catch (e) {
+      log('Error inesperado en PlayerService: $e');
+      throw Exception('Ocurrió un error inesperado.');
+    }
+  }
+
+  Future<Player> createPlayer({
     required int leagueId,
     required String name,
     File? imageFile,
-  }) async {
-    final token = await _authService.getToken();
-    if (token == null) {
-      throw Exception('Token no encontrado');
-    }
+  }) =>
+      _executeWithAuth((token) => _playerRepository.createPlayer(
+            leagueId: leagueId,
+            name: name,
+            imageFile: imageFile,
+            token: token,
+          ));
 
-    final request = http.MultipartRequest(
-      'POST',
-      Uri.parse('${ApiConfig.baseUrl}/leagues/$leagueId/players'),
-    );
+  Future<void> deletePlayer(int leagueId, int playerId) =>
+      _executeWithAuth((token) => _playerRepository.deletePlayer(leagueId, playerId, token));
 
-    request.headers['Authorization'] = 'Bearer $token';
-    request.fields['name'] = name;
-
-    if (imageFile != null) {
-      request.files.add(
-        await http.MultipartFile.fromPath('image', imageFile.path),
-      );
-    }
-
-    final response = await request.send();
-    final responseBody = await response.stream.bytesToString();
-
-    if (response.statusCode == 201) {
-      return Player.fromJson(json.decode(responseBody));
-    } else {
-      return null;
-    }
-  }
-
-  Future<bool> deletePlayer(int leagueId, int playerId) async {
-    final token = await _authService.getToken();
-    if (token == null) throw Exception('Token no encontrado');
-
-    final response = await http.delete(
-      Uri.parse('${ApiConfig.baseUrl}/leagues/$leagueId/players/$playerId'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
-
-    return response.statusCode == 204;
-  }
-
-  Future<Player?> updatePlayer({
+  Future<Player> updatePlayer({
     required int leagueId,
     required int playerId,
     required String name,
     File? imageFile,
-  }) async {
-    final token = await _authService.getToken();
-    if (token == null) throw Exception('Token no encontrado');
-
-    final request = http.MultipartRequest(
-      'PATCH',
-      Uri.parse('${ApiConfig.baseUrl}/leagues/$leagueId/players/$playerId'),
-    );
-
-    request.headers['Authorization'] = 'Bearer $token';
-    request.fields['name'] = name;
-
-    if (imageFile != null) {
-      request.files.add(
-        await http.MultipartFile.fromPath('image', imageFile.path),
-      );
-    }
-
-    final response = await request.send();
-    final responseBody = await response.stream.bytesToString();
-
-    if (response.statusCode == 200) {
-      return Player.fromJson(json.decode(responseBody));
-    } else {
-      return null;
-    }
-  }
+  }) =>
+      _executeWithAuth((token) => _playerRepository.updatePlayer(
+            leagueId: leagueId,
+            playerId: playerId,
+            name: name,
+            imageFile: imageFile,
+            token: token,
+          ));
 }

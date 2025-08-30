@@ -74,11 +74,43 @@ class ApiClient {
 
   dynamic _handleResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      if (response.body.isEmpty) return null; // Para respuestas 204 No Content
+      if (response.body.isEmpty) return null;
       return json.decode(utf8.decode(response.bodyBytes));
     } else {
       final errorBody = json.decode(response.body);
       throw ApiException(errorBody['message'] ?? 'Error desconocido', response.statusCode);
+    }
+  }
+
+  Future<http.MultipartRequest> multipartRequest(
+    String endpoint, {
+    String method = 'POST',
+    Map<String, String>? fields,
+    File? file,
+    String? fileFieldName,
+  }) async {
+    final url = Uri.parse('$baseUrl/$endpoint');
+    final request = http.MultipartRequest(method, url);
+    
+    request.headers.addAll(_authHeaders);
+    if (fields != null) {
+      request.fields.addAll(fields);
+    }
+    if (file != null && fileFieldName != null) {
+      request.files.add(await http.MultipartFile.fromPath(fileFieldName, file.path));
+    }
+    
+    return request;
+  }
+
+  Future<dynamic> handleStreamedResponse(http.StreamedResponse response) async {
+    final responseBody = await response.stream.bytesToString();
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (responseBody.isEmpty) return null;
+        return json.decode(responseBody);
+    } else {
+        final errorBody = json.decode(responseBody);
+        throw ApiException(errorBody['message'] ?? 'Error en la subida', response.statusCode);
     }
   }
 }

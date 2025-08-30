@@ -33,31 +33,32 @@ class _CreatePlayerScreenState extends State<CreatePlayerScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-
-    setState(() { _isLoading = true; });
-
+    
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
-    final newPlayer = await _playerService.createPlayer(
-      leagueId: widget.leagueId,
-      name: _nameController.text,
-      imageFile: _selectedImage,
-    );
+    setState(() { _isLoading = true; });
 
-    if (mounted) {
-      setState(() { _isLoading = false; });
-    }
-
-    if (newPlayer != null) {
+    try {
+      await _playerService.createPlayer(
+        leagueId: widget.leagueId,
+        name: _nameController.text,
+        imageFile: _selectedImage,
+      );
+      
       messenger.showSnackBar(
         const SnackBar(content: Text('¡Jugador creado con éxito!'), backgroundColor: Colors.green),
       );
       navigator.pop(true);
-    } else {
+      
+    } catch (e) {
       messenger.showSnackBar(
-        const SnackBar(content: Text('Error al crear el jugador.'), backgroundColor: Colors.red),
+        SnackBar(content: Text('Error: ${e.toString().replaceFirst("Exception: ", "")}'), backgroundColor: Colors.red),
       );
+    } finally {
+      if (mounted) {
+        setState(() { _isLoading = false; });
+      }
     }
   }
 

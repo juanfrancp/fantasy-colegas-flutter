@@ -22,35 +22,40 @@ class PlayerInfoDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final PlayerService playerService = PlayerService();
     final navigator = Navigator.of(context);
+
+  void deletePlayer() async {
+    final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
-    void deletePlayer() async {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Confirmar eliminación'),
-          content: Text('¿Seguro que quieres eliminar a ${player.name}?'),
-          actions: [
-            TextButton(onPressed: () => navigator.pop(false), child: const Text('Cancelar')),
-            TextButton(
-              onPressed: () => navigator.pop(true),
-              child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
-            ),
-          ],
-        ),
-      );
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Confirmar eliminación'),
+        content: Text('¿Seguro que quieres eliminar a ${player.name}?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
 
-      if (confirmed == true) {
-        final success = await playerService.deletePlayer(leagueId, player.id);
-        if (success) {
-          messenger.showSnackBar(const SnackBar(content: Text('Jugador eliminado.'), backgroundColor: Colors.green));
-          navigator.pop();
-          onDataChanged();
-        } else {
-          messenger.showSnackBar(const SnackBar(content: Text('Error al eliminar.'), backgroundColor: Colors.red));
-        }
-      }
+    if (confirmed != true) return;
+
+    try {
+      await playerService.deletePlayer(leagueId, player.id);
+      
+      messenger.showSnackBar(const SnackBar(content: Text('Jugador eliminado.'), backgroundColor: Colors.green));
+      navigator.pop();
+      onDataChanged();
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Error al eliminar: ${e.toString().replaceFirst("Exception: ", "")}'), backgroundColor: Colors.red)
+      );
     }
+  }
 
     void editPlayer() async {
       navigator.pop();

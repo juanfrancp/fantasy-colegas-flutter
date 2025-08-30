@@ -43,37 +43,38 @@ class _EditPlayerScreenState extends State<EditPlayerScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-
-    setState(() { _isLoading = true; });
+    
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
-    final updatedPlayer = await _playerService.updatePlayer(
-      leagueId: widget.leagueId,
-      playerId: widget.player.id,
-      name: _nameController.text,
-      imageFile: _selectedImage,
-    );
+    setState(() { _isLoading = true; });
 
-    if (mounted) {
-      setState(() { _isLoading = false; });
-    }
-
-    if (updatedPlayer != null) {
+    try {
+      await _playerService.updatePlayer(
+        leagueId: widget.leagueId,
+        playerId: widget.player.id,
+        name: _nameController.text,
+        imageFile: _selectedImage,
+      );
+      
       messenger.showSnackBar(
         const SnackBar(content: Text('¡Jugador actualizado!'), backgroundColor: Colors.green),
       );
-      navigator.pop(true); // Devuelve 'true' para refrescar
-    } else {
+      navigator.pop(true);
+      
+    } catch (e) {
       messenger.showSnackBar(
-        const SnackBar(content: Text('Error al actualizar.'), backgroundColor: Colors.red),
+        SnackBar(content: Text('Error: ${e.toString().replaceFirst("Exception: ", "")}'), backgroundColor: Colors.red),
       );
+    } finally {
+      if (mounted) {
+        setState(() { _isLoading = false; });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Lógica para mostrar la imagen actual o la nueva seleccionada
     ImageProvider currentImageProvider;
     if (_selectedImage != null) {
       currentImageProvider = FileImage(_selectedImage!);
