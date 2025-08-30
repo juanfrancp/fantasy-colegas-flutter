@@ -33,66 +33,60 @@ class _CreateLeagueScreenState extends State<CreateLeagueScreen> {
   }
 
   Future<void> _submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      final navigator = Navigator.of(context);
-      final scaffoldMessenger = ScaffoldMessenger.of(context);
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
-      setState(() {
-        _isLoading = true;
-      });
+    final navigator = Navigator.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
 
-      try {
-        final newLeague = await _leagueService.createLeague(
-          name: _nameController.text,
-          description: _descriptionController.text,
-          teamSize: _currentSliderValue.round(),
-          isPrivate: _isPrivate,
-        );
+    setState(() {
+      _isLoading = true;
+    });
 
-        if (newLeague != null) {
-          if (_selectedImage != null) {
-            final success = await _leagueService.uploadLeagueImage(
-              leagueId: newLeague.id.toString(),
-              imageFile: _selectedImage!,
-            );
+    try {
+      final newLeague = await _leagueService.createLeague(
+        name: _nameController.text,
+        description: _descriptionController.text,
+        teamSize: _currentSliderValue.round(),
+        isPrivate: _isPrivate,
+      );
 
-            if (success == null) {
-              scaffoldMessenger.showSnackBar(
-                const SnackBar(
-                    content: Text(
-                        'La liga se creó, pero falló la subida de la imagen.'),
-                    backgroundColor: Colors.orange),
-              );
-            }
-          }
-
+      if (_selectedImage != null) {
+        try {
+          await _leagueService.uploadLeagueImage(
+            leagueId: newLeague.id.toString(),
+            imageFile: _selectedImage!,
+          );
+        } catch (e) {
           scaffoldMessenger.showSnackBar(
             const SnackBar(
-                content: Text('¡Liga creada con éxito!'),
-                backgroundColor: Colors.green),
+              content: Text('La liga se creó, pero falló la subida de la imagen.'),
+              backgroundColor: Colors.orange,
+            ),
           );
-          
-          navigator.pop(true); 
+        }
+      }
 
-        } else {
-          scaffoldMessenger.showSnackBar(
-            const SnackBar(
-                content: Text('Error al crear la liga.'),
-                backgroundColor: Colors.red),
-          );
-        }
-      } catch (e) {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(
-              content: Text('Ocurrió un error: $e'),
-              backgroundColor: Colors.red),
-        );
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(
+            content: Text('¡Liga creada con éxito!'),
+            backgroundColor: Colors.green),
+      );
+      navigator.pop(true);
+
+    } catch (e) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString().replaceFirst("Exception: ", "")}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }

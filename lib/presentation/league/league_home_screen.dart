@@ -36,8 +36,9 @@ class _LeagueHomeScreenState extends State<LeagueHomeScreen> {
     final currentUser = await _userService.getMe();
     if (currentUser == null || !mounted) return;
 
-    final isAdmin = _currentLeague.admins.any((admin) => admin.id == currentUser.id);
-    
+    final isAdmin =
+        _currentLeague.admins.any((admin) => admin.id == currentUser.id);
+
     if (mounted) {
       setState(() {
         _isAdmin = isAdmin;
@@ -46,18 +47,26 @@ class _LeagueHomeScreenState extends State<LeagueHomeScreen> {
   }
 
   Future<void> _refreshLeagueData() async {
-    final updatedLeague = await _leagueService.getLeagueById(_currentLeague.id);
-    if (updatedLeague != null && mounted) {
-      setState(() {
-        _currentLeague = updatedLeague;
-      });
-      await _checkAdminStatus();
+    try {
+      final updatedLeague = await _leagueService.getLeagueById(_currentLeague.id);
+      
+      if (mounted) {
+        setState(() {
+          _currentLeague = updatedLeague;
+        });
+        await _checkAdminStatus();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al actualizar la liga: ${e.toString().replaceFirst("Exception: ", "")}')),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-
     return DefaultTabController(
       length: 5,
       child: Scaffold(

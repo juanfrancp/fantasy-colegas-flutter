@@ -68,23 +68,26 @@ class _MemberInfoDialogState extends State<MemberInfoDialog> {
 
     if (confirmed != true) return;
 
-    final error = await _leagueService.expelUser(widget.leagueId, widget.member.id);
-    if (error == null) {
+    try {
+      await _leagueService.expelUser(widget.leagueId, widget.member.id);
+      
       widget.onDataChanged();
       navigator.pop();
-    } else {
-      _showError(error);
+    } catch (e) {
+      _showError(e.toString().replaceFirst("Exception: ", ""));
     }
   }
 
   Future<void> _makeAdmin() async {
     final navigator = Navigator.of(context);
-    final error = await _leagueService.makeUserAdmin(widget.leagueId, widget.member.id);
-    if (error == null) {
+    
+    try {
+      await _leagueService.makeUserAdmin(widget.leagueId, widget.member.id);
+      
       widget.onDataChanged();
       navigator.pop();
-    } else {
-      _showError(error);
+    } catch (e) {
+      _showError(e.toString().replaceFirst("Exception: ", ""));
     }
   }
 

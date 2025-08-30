@@ -19,7 +19,7 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _scoreboardFuture = _leagueService.getScoreboard(widget.league.id);
+    _scoreboardFuture = _leagueService.getLeagueStandings(widget.league.id);
   }
 
   @override

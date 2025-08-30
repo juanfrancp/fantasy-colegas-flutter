@@ -1,11 +1,11 @@
 import 'dart:io';
+import 'package:fantasy_colegas_app/presentation/league/widgets/delete_league_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:fantasy_colegas_app/data/models/league.dart';
 import 'package:fantasy_colegas_app/domain/services/league_service.dart';
 import 'package:fantasy_colegas_app/core/config/api_config.dart';
 import 'package:fantasy_colegas_app/presentation/home/home_screen.dart';
-import 'widgets/delete_league_dialog.dart';
 
 class ManageLeagueScreen extends StatefulWidget {
   final League league;
@@ -77,82 +77,82 @@ class _ManageLeagueScreenState extends State<ManageLeagueScreen> {
   Future<void> _saveChanges() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
     final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-            title: const Text('Confirmar Cambios'),
-            content: const Text('¿Estás seguro de que quieres guardar los cambios?'),
-            actions: [
-                TextButton(child: const Text('Cancelar'), onPressed: () => Navigator.of(context).pop(false)),
-                ElevatedButton(child: const Text('Guardar'), onPressed: () => Navigator.of(context).pop(true)),
-            ],
-        ),
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar Cambios'),
+        content: const Text('¿Estás seguro de que quieres guardar los cambios?'),
+        actions: [
+          TextButton(
+            child: const Text('Cancelar'),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          ElevatedButton(
+            child: const Text('Guardar'),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
+      ),
     );
 
     if (confirmed != true) return;
 
     setState(() { _isLoading = true; });
 
-    bool teamSizeChanged = widget.league.teamSize != _teamSize.round();
-    bool otherDataChanged = widget.league.name != _nameController.text ||
-                            widget.league.description != _descriptionController.text ||
-                            widget.league.isPrivate != _isPrivate ||
-                            _selectedImage != null;
-
     bool success = true;
-    String? finalImageUrl = widget.league.image;
-
+    
     try {
-      // 1. Si la imagen ha cambiado, la subimos primero.
+      bool teamSizeChanged = widget.league.teamSize != _teamSize.round();
+      bool otherDataChanged = widget.league.name != _nameController.text ||
+                              widget.league.description != _descriptionController.text ||
+                              widget.league.isPrivate != _isPrivate ||
+                              _selectedImage != null;
+
+      String? finalImageUrl = widget.league.image;
+
       if (_selectedImage != null) {
-        final newImageUrl = await _leagueService.uploadLeagueImage(
-            leagueId: widget.league.id.toString(),
-            imageFile: _selectedImage!,
+        finalImageUrl = await _leagueService.uploadLeagueImage(
+          leagueId: widget.league.id.toString(),
+          imageFile: _selectedImage!,
         );
-        if (newImageUrl != null) {
-          finalImageUrl = newImageUrl;
-        }
       }
 
-      // 2. Si el tamaño del equipo ha cambiado, llamamos al endpoint específico.
       if (teamSizeChanged) {
-        final updatedLeague = await _leagueService.updateLeagueTeamSize(
+        await _leagueService.updateLeagueTeamSize(
           leagueId: widget.league.id,
           newTeamSize: _teamSize.round(),
         );
-        if (updatedLeague == null) success = false;
       }
 
-      // 3. Si otros datos han cambiado (y la operación anterior no ha fallado), actualizamos el resto.
-      if (otherDataChanged && success) {
-        final updatedLeague = await _leagueService.updateLeague(
-          widget.league.id,
-          _nameController.text,
-          _descriptionController.text,
-          _isPrivate,
-          _teamSize.round(), // Se envía el tamaño de equipo por si acaso, aunque la lógica principal ya se ejecutó.
-          finalImageUrl,
+      if (otherDataChanged) {
+        await _leagueService.updateLeague(
+          leagueId: widget.league.id,
+          name: _nameController.text,
+          description: _descriptionController.text,
+          isPrivate: _isPrivate,
+          teamSize: _teamSize.round(),
+          imageUrl: finalImageUrl,
         );
-        if (updatedLeague == null) success = false;
       }
-
     } catch (e) {
       success = false;
+      messenger.showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString().replaceFirst("Exception: ", "")}'), backgroundColor: Colors.red),
+      );
     }
+
+    if (!navigator.mounted) return;
 
     setState(() { _isLoading = false; });
 
-    if (mounted) {
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('¡Liga actualizada con éxito!'), backgroundColor: Colors.green),
-        );
-        Navigator.of(context).pop(true);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error al actualizar la liga.'), backgroundColor: Colors.red),
-        );
-      }
+    if (success) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('¡Liga actualizada con éxito!'), backgroundColor: Colors.green),
+      );
+      navigator.pop(true);
     }
   }
   
@@ -163,13 +163,22 @@ class _ManageLeagueScreenState extends State<ManageLeagueScreen> {
       builder: (context) => const DeleteLeagueConfirmationDialog(),
     );
 
-    if (confirmed != true || !mounted) return;
+    if (!mounted || confirmed != true) return;
 
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
+    bool success = true;
     setState(() { _isLoading = true; });
-    final success = await _leagueService.deleteLeague(widget.league.id);
+    
+    try {
+      await _leagueService.deleteLeague(widget.league.id);
+    } catch (e) {
+      success = false;
+      messenger.showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString().replaceFirst("Exception: ", "")}'), backgroundColor: Colors.red),
+      );
+    }
     
     if (!mounted) return;
     
@@ -183,10 +192,6 @@ class _ManageLeagueScreenState extends State<ManageLeagueScreen> {
         MaterialPageRoute(builder: (context) => const HomeScreen()),
         (route) => false,
       );
-    } else {
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Error al eliminar la liga.'), backgroundColor: Colors.red),
-      );
     }
   }
 
@@ -197,7 +202,7 @@ class _ManageLeagueScreenState extends State<ManageLeagueScreen> {
         title: const Text('Gestionar Liga'),
         actions: [
           IconButton(
-            icon: _isLoading ? const SizedBox.shrink() : const Icon(Icons.save),
+            icon: _isLoading ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2.0) : const Icon(Icons.save),
             onPressed: _isLoading ? null : _saveChanges,
             tooltip: 'Guardar Cambios',
           )
@@ -219,10 +224,13 @@ class _ManageLeagueScreenState extends State<ManageLeagueScreen> {
                       child: ClipOval(
                         child: _selectedImage != null
                           ? Image.file(_selectedImage!, width: 120, height: 120, fit: BoxFit.cover)
-                          : Image.network(
-                              '${ApiConfig.serverUrl}${widget.league.image}',
-                              width: 120, height: 120, fit: BoxFit.cover,
-                              errorBuilder: (c, e, s) => Image.asset('assets/images/default_league.png', fit: BoxFit.cover),
+                          : (widget.league.image != null && widget.league.image!.isNotEmpty
+                              ? Image.network(
+                                  '${ApiConfig.serverUrl}${widget.league.image}',
+                                  width: 120, height: 120, fit: BoxFit.cover,
+                                  errorBuilder: (c, e, s) => Image.asset('assets/images/default_league.png', fit: BoxFit.cover),
+                                )
+                              : Image.asset('assets/images/default_league.png', fit: BoxFit.cover)
                             ),
                       ),
                     ),

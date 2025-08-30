@@ -1,10 +1,10 @@
-import 'package:fantasy_colegas_app/presentation/home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fantasy_colegas_app/data/models/league.dart';
 import 'package:fantasy_colegas_app/data/models/user.dart';
 import 'package:fantasy_colegas_app/domain/services/league_service.dart';
 import 'package:fantasy_colegas_app/core/config/api_config.dart';
+import 'package:fantasy_colegas_app/presentation/home/home_screen.dart';
 import 'package:fantasy_colegas_app/presentation/league/manage_league_screen.dart';
 import 'widgets/join_requests_dialog.dart';
 import 'widgets/member_info_dialog.dart';
@@ -54,11 +54,19 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
   }
 
   Future<void> _loadPendingRequests() async {
-    final count = await _leagueService.getPendingJoinRequestsCount(widget.league.id);
-    if (mounted) {
-      setState(() {
-        _pendingRequestsCount = count;
-      });
+    try {
+      final requests = await _leagueService.getPendingJoinRequests(widget.league.id);
+      if (mounted) {
+        setState(() {
+          _pendingRequestsCount = requests.length;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _pendingRequestsCount = 0;
+        });
+      }
     }
   }
 
@@ -67,8 +75,7 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
       context: context,
       builder: (context) => JoinRequestsDialog(leagueId: widget.league.id),
     );
-
-    if (result == true && mounted) {
+    if (result == true) {
       widget.onLeagueUpdated();
     }
   }
@@ -95,15 +102,12 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
 
     if (confirm != true || !mounted) return;
 
-    
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
-    final errorMessage = await _leagueService.leaveLeague(widget.league.id);
-
-    if (!mounted) return;
-
-    if (errorMessage == null) {
+    try {
+      await _leagueService.leaveLeague(widget.league.id);
+      
       messenger.showSnackBar(
         const SnackBar(content: Text('Has abandonado la liga.'), backgroundColor: Colors.green),
       );
@@ -111,9 +115,9 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
         MaterialPageRoute(builder: (context) => const HomeScreen()),
         (route) => false,
       );
-    } else {
+    } catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+        SnackBar(content: Text(e.toString().replaceFirst("Exception: ", "")), backgroundColor: Colors.red),
       );
     }
   }
@@ -263,9 +267,7 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
                           member: member,
                           isCurrentUserAdmin: widget.isAdmin,
                           isMemberAdmin: isMemberAdmin,
-                          onDataChanged: () {
-                            widget.onLeagueUpdated();
-                          },
+                          onDataChanged: widget.onLeagueUpdated,
                         ),
                       );
                     },
