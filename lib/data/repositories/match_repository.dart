@@ -40,4 +40,14 @@ class MatchRepository {
       );
     });
   }
+
+  Future<Match> updateMatch(int matchId, MatchCreate matchData) async {
+  return _executeWithAuth((token) async {
+    final jsonResponse = await _client(token).put(
+      'matches/$matchId',
+      body: matchData.toJson(),
+    );
+    return Match.fromJson(jsonResponse);
+  });
+}
 }

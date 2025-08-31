@@ -16,4 +16,8 @@ class MatchService {
   Future<void> createMatch(MatchCreate match) {
     return _matchRepository.createMatch(match);
   }
+
+  Future<Match> updateMatch(int matchId, MatchCreate matchData) {
+    return _matchRepository.updateMatch(matchId, matchData);
+  }
 }

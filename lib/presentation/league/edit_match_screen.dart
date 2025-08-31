@@ -1,4 +1,5 @@
 import 'package:fantasy_colegas_app/data/models/league.dart';
+import 'package:fantasy_colegas_app/data/models/match.dart';
 import 'package:fantasy_colegas_app/data/models/match_create.dart';
 import 'package:fantasy_colegas_app/data/models/player.dart';
 import 'package:fantasy_colegas_app/domain/services/league_service.dart';
@@ -8,19 +9,20 @@ import 'package:fantasy_colegas_app/core/config/app_colors.dart';
 import 'package:fantasy_colegas_app/presentation/league/widgets/player_selection_dialog.dart';
 import 'package:intl/intl.dart';
 
-class ScheduleMatchScreen extends StatefulWidget {
+class EditMatchScreen extends StatefulWidget {
+  final Match match;
   final League league;
 
-  const ScheduleMatchScreen({super.key, required this.league});
+  const EditMatchScreen({super.key, required this.match, required this.league});
 
   @override
-  State<ScheduleMatchScreen> createState() => _ScheduleMatchScreenState();
+  State<EditMatchScreen> createState() => _EditMatchScreenState();
 }
 
-class _ScheduleMatchScreenState extends State<ScheduleMatchScreen> {
+class _EditMatchScreenState extends State<EditMatchScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _homeTeamController = TextEditingController();
-  final _awayTeamController = TextEditingController();
+  late TextEditingController _homeTeamController;
+  late TextEditingController _awayTeamController;
 
   final LeagueService _leagueService = LeagueService();
   final MatchService _matchService = MatchService();
@@ -34,7 +36,48 @@ class _ScheduleMatchScreenState extends State<ScheduleMatchScreen> {
   @override
   void initState() {
     super.initState();
+    // Pre-rellenamos el formulario con los datos del partido
+    _homeTeamController = TextEditingController(text: widget.match.homeTeam.name);
+    _awayTeamController = TextEditingController(text: widget.match.awayTeam.name);
+    _selectedDate = widget.match.matchDate;
+    _homeTeamPlayers = List.from(widget.match.homeTeam.players);
+    _awayTeamPlayers = List.from(widget.match.awayTeam.players);
+
     _fetchLeaguePlayers();
+  }
+  
+  // El resto de la clase (métodos _fetchLeaguePlayers, _selectDate, build, etc.)
+  // es casi idéntico a ScheduleMatchScreen. La única diferencia es el método _submitForm.
+
+  Future<void> _submitForm() async {
+    if (_formKey.currentState?.validate() != true) return;
+    
+    setState(() { _isLoading = true; });
+
+    final matchData = MatchCreate( // Reutilizamos el modelo MatchCreate
+      leagueId: widget.league.id.toString(),
+      homeTeamName: _homeTeamController.text,
+      awayTeamName: _awayTeamController.text,
+      matchDate: _selectedDate!,
+      homeTeamPlayerIds: _homeTeamPlayers.map((p) => p.id).toList(),
+      awayTeamPlayerIds: _awayTeamPlayers.map((p) => p.id).toList(),
+    );
+
+    try {
+      await _matchService.updateMatch(widget.match.id, matchData);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('¡Partido actualizado con éxito!')),
+      );
+      Navigator.of(context).pop(true); // Devuelve true para refrescar la lista
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al actualizar el partido: $e')),
+      );
+    } finally {
+      if (mounted) { setState(() { _isLoading = false; }); }
+    }
   }
 
   Future<void> _fetchLeaguePlayers() async {
@@ -56,55 +99,41 @@ class _ScheduleMatchScreenState extends State<ScheduleMatchScreen> {
     }
   }
 
-  Future<void> _submitForm() async {
-    if (_formKey.currentState?.validate() != true) {
-      return;
-    }
-    if (_selectedDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, selecciona una fecha para el partido')),
-      );
-      return;
-    }
-    if (_homeTeamPlayers.isEmpty || _awayTeamPlayers.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ambos equipos deben tener al menos un jugador')),
-      );
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    final matchToCreate = MatchCreate(
-      leagueId: widget.league.id.toString(),
-      homeTeamName: _homeTeamController.text,
-      awayTeamName: _awayTeamController.text,
-      matchDate: _selectedDate!,
-      homeTeamPlayerIds: _homeTeamPlayers.map((p) => p.id).toList(),
-      awayTeamPlayerIds: _awayTeamPlayers.map((p) => p.id).toList(),
+  Future<void> _selectDate() async {
+    // 1. Pide la fecha
+    final DateTime? pickedDate = await showDatePicker(
+      context: context, // Usa el 'context' directamente del State
+      initialDate: _selectedDate ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+      locale: const Locale('es', 'ES'),
     );
 
-    try {
-      await _matchService.createMatch(matchToCreate);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('¡Partido programado con éxito!')),
+    if (pickedDate == null) return; 
+
+    // Esta comprobación ahora es 100% válida para el siguiente uso de 'context'
+    if (!mounted) return; 
+
+    // 2. Pide la hora
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context, // Usa el 'context' directamente del State
+      initialTime: TimeOfDay.fromDateTime(_selectedDate ?? DateTime.now()),
+      initialEntryMode: TimePickerEntryMode.input,
+      helpText: 'Selecciona la Hora del Partido',
+    );
+
+    if (pickedTime == null) return; 
+
+    // 3. Combina fecha y hora
+    setState(() {
+      _selectedDate = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedTime.hour,
+        pickedTime.minute,
       );
-      Navigator.of(context).pop(true);
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al crear el partido: $e')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
+    });
   }
 
   @override
@@ -182,7 +211,7 @@ class _ScheduleMatchScreenState extends State<ScheduleMatchScreen> {
         ),
         const Spacer(),
         IconButton(
-          onPressed: _selectDate, // <-- CORRECCIÓN: Se llama sin pasar 'context'
+          onPressed: _selectDate,
           icon: const Icon(Icons.edit, color: AppColors.primaryAccent),
         ),
       ],
@@ -242,42 +271,4 @@ class _ScheduleMatchScreenState extends State<ScheduleMatchScreen> {
       });
     }
   }
-
-  Future<void> _selectDate() async {
-    // 1. Pide la fecha
-    final DateTime? pickedDate = await showDatePicker(
-      context: context, // Usa el 'context' directamente del State
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2101),
-      locale: const Locale('es', 'ES'),
-    );
-
-    if (pickedDate == null) return; 
-
-    // Esta comprobación ahora es 100% válida para el siguiente uso de 'context'
-    if (!mounted) return; 
-
-    // 2. Pide la hora
-    final TimeOfDay? pickedTime = await showTimePicker(
-      context: context, // Usa el 'context' directamente del State
-      initialTime: TimeOfDay.fromDateTime(_selectedDate ?? DateTime.now()),
-      initialEntryMode: TimePickerEntryMode.input,
-      helpText: 'Selecciona la Hora del Partido',
-    );
-
-    if (pickedTime == null) return; 
-
-    // 3. Combina fecha y hora
-    setState(() {
-      _selectedDate = DateTime(
-        pickedDate.year,
-        pickedDate.month,
-        pickedDate.day,
-        pickedTime.hour,
-        pickedTime.minute,
-      );
-    });
-  }
-
 }

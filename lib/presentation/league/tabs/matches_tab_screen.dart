@@ -1,31 +1,69 @@
 import 'package:fantasy_colegas_app/data/models/league.dart';
+import 'package:fantasy_colegas_app/data/models/match.dart'; // Importa el modelo Match
+import 'package:fantasy_colegas_app/domain/services/match_service.dart'; // Importa el servicio
+import 'package:fantasy_colegas_app/presentation/league/match_details_screen.dart';
 import 'package:fantasy_colegas_app/presentation/league/schedule_match_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fantasy_colegas_app/core/config/app_colors.dart';
+import 'package:intl/intl.dart'; // Importa el paquete de formato de fecha
 
 class MatchesTabScreen extends StatefulWidget {
   final League league;
   final bool isAdmin;
 
-  const MatchesTabScreen({super.key, required this.league, this.isAdmin = false});
+  const MatchesTabScreen({
+    super.key,
+    required this.league,
+    this.isAdmin = false,
+  });
 
   @override
   State<MatchesTabScreen> createState() => _MatchesTabScreenState();
 }
 
 class _MatchesTabScreenState extends State<MatchesTabScreen> {
+  final MatchService _matchService = MatchService();
+
   bool _showUpcomingMatches = true;
+  bool _isLoading = true;
+  String? _errorMessage;
 
-  // Datos de ejemplo
-  final List<Map<String, String>> _upcomingMatches = [
-    {"team1": "Equipo A", "team2": "Equipo B", "date": "25/12/2024"},
-    {"team1": "Equipo C", "team2": "Equipo D", "date": "28/12/2024"},
-  ];
+  // Listas para guardar los datos reales de la API
+  List<Match> _upcomingMatches = [];
+  List<Match> _pastMatches = [];
 
-  final List<Map<String, String>> _pastMatches = [
-    {"team1": "Equipo X", "team2": "Equipo Y", "score": "2 - 1"},
-    {"team1": "Equipo Z", "team2": "Equipo W", "score": "0 - 0"},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchMatches();
+  }
+
+  Future<void> _fetchMatches() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      // Llamadas concurrentes para más eficiencia
+      final results = await Future.wait([
+        _matchService.getUpcomingMatches(),
+        _matchService.getPastMatches(),
+      ]);
+      if (!mounted) return;
+
+      setState(() {
+        _upcomingMatches = results[0];
+        _pastMatches = results[1];
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Error al cargar los partidos: $e";
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,20 +73,37 @@ class _MatchesTabScreenState extends State<MatchesTabScreen> {
         children: [
           _buildMatchToggleButtons(),
           Expanded(
-            child: _showUpcomingMatches
-                ? _buildMatchesList(_upcomingMatches, isUpcoming: true)
-                : _buildMatchesList(_pastMatches, isUpcoming: false),
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _errorMessage != null
+                ? Center(
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: _fetchMatches,
+                    child: _showUpcomingMatches
+                        ? _buildMatchesList(_upcomingMatches, isUpcoming: true)
+                        : _buildMatchesList(_pastMatches, isUpcoming: false),
+                  ),
           ),
         ],
       ),
       floatingActionButton: widget.isAdmin
           ? FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.of(context).push(
+              onPressed: () async {
+                final result = await Navigator.of(context).push<bool>(
                   MaterialPageRoute(
-                    builder: (context) => ScheduleMatchScreen(league: widget.league),
+                    builder: (context) =>
+                        ScheduleMatchScreen(league: widget.league),
                   ),
                 );
+                // Si se creó un partido con éxito, refrescamos la lista
+                if (result == true) {
+                  _fetchMatches();
+                }
               },
               label: const Text('Programar Partido'),
               icon: const Icon(Icons.add),
@@ -59,11 +114,11 @@ class _MatchesTabScreenState extends State<MatchesTabScreen> {
   }
 
   Widget _buildMatchToggleButtons() {
+    // ... (Este widget no necesita cambios, puedes dejar el que ya tienes)
     return Container(
       margin: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        // Cambiado withOpacity a withAlpha
-        color: AppColors.lightSurface.withAlpha(26), // 0.1 opacity
+        color: AppColors.lightSurface.withAlpha(26),
         borderRadius: BorderRadius.circular(20.0),
       ),
       child: Row(
@@ -115,10 +170,8 @@ class _MatchesTabScreenState extends State<MatchesTabScreen> {
     );
   }
 
-  Widget _buildMatchesList(
-    List<Map<String, String>> matches, {
-    required bool isUpcoming,
-  }) {
+  // MÉTODO MODIFICADO PARA USAR EL MODELO Match
+  Widget _buildMatchesList(List<Match> matches, {required bool isUpcoming}) {
     if (matches.isEmpty) {
       return Center(
         child: Text(
@@ -134,26 +187,40 @@ class _MatchesTabScreenState extends State<MatchesTabScreen> {
       itemCount: matches.length,
       itemBuilder: (context, index) {
         final match = matches[index];
+        final formattedDate = DateFormat(
+          'dd/MM/yyyy HH:mm',
+        ).format(match.matchDate);
+        final score = '${match.homeScore ?? '-'} - ${match.awayScore ?? '-'}';
+
         return Card(
-          // Cambiado withOpacity a withAlpha
-          color: AppColors.lightSurface.withAlpha(26), // 0.1 opacity
+          color: AppColors.lightSurface.withAlpha(26),
           margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: ListTile(
             title: Text(
-              '${match["team1"]} vs ${match["team2"]}',
+              '${match.homeTeam.name} vs ${match.awayTeam.name}',
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 color: AppColors.lightSurface,
               ),
             ),
             subtitle: Text(
-              isUpcoming
-                  ? 'Fecha: ${match["date"]}'
-                  : 'Resultado: ${match["score"]}',
+              isUpcoming ? 'Fecha: $formattedDate' : 'Resultado: $score',
               style: const TextStyle(color: AppColors.secondaryAccent),
             ),
-            onTap: () {
-              // TODO: Navegar a la pantalla de detalles del partido
+            onTap: () async {
+              final bool? shouldRefresh = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (context) => MatchDetailsScreen(
+                    match: match,
+                    isAdmin: widget.isAdmin,
+                    isUpcoming: isUpcoming,
+                    league: widget.league,
+                  ),
+                ),
+              );
+              if (shouldRefresh == true) {
+                _fetchMatches();
+              }
             },
           ),
         );
