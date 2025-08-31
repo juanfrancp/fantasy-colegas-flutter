@@ -5,6 +5,7 @@ import 'package:fantasy_colegas_app/data/models/player.dart';
 import 'package:fantasy_colegas_app/domain/services/league_service.dart';
 import 'package:fantasy_colegas_app/core/config/api_config.dart';
 import 'package:fantasy_colegas_app/presentation/league/create_player_screen.dart';
+import 'package:fantasy_colegas_app/core/config/app_colors.dart';
 
 class PlayersTabScreen extends StatefulWidget {
   final League league;
@@ -56,7 +57,10 @@ class _PlayersTabScreenState extends State<PlayersTabScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al cargar jugadores: $e')),
+          SnackBar(
+            content: Text('Error al cargar jugadores: $e'),
+            backgroundColor: AppColors.primaryAccent,
+          ),
         );
       }
     }
@@ -98,32 +102,47 @@ class _PlayersTabScreenState extends State<PlayersTabScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.darkBackground,
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               controller: _searchController,
+              style: const TextStyle(color: AppColors.lightSurface),
               decoration: InputDecoration(
                 labelText: 'Buscar jugador por nombre',
-                prefixIcon: const Icon(Icons.search),
+                labelStyle: const TextStyle(color: AppColors.secondaryAccent),
+                prefixIcon: const Icon(
+                  Icons.search,
+                  color: AppColors.secondaryAccent,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25.0),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                  borderSide: BorderSide(
+                    color: AppColors.secondaryAccent.withAlpha(100),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                  borderSide: const BorderSide(color: AppColors.lightSurface),
                 ),
                 contentPadding: const EdgeInsets.symmetric(vertical: 10.0),
               ),
             ),
           ),
-          Expanded(
-            child: _buildPlayerList(),
-          ),
+          Expanded(child: _buildPlayerList()),
         ],
       ),
       floatingActionButton: widget.isAdmin
           ? FloatingActionButton(
               onPressed: _navigateAndRefresh,
               tooltip: 'Añadir Jugador',
-              child: const Icon(Icons.add),
+              backgroundColor: AppColors.primaryAccent,
+              child: const Icon(Icons.add, color: AppColors.pureWhite),
             )
           : null,
     );
@@ -131,13 +150,25 @@ class _PlayersTabScreenState extends State<PlayersTabScreen> {
 
   Widget _buildPlayerList() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primaryAccent),
+      );
     }
     if (_allPlayers.isEmpty) {
-      return const Center(child: Text('No hay jugadores en esta liga.'));
+      return const Center(
+        child: Text(
+          'No hay jugadores en esta liga.',
+          style: TextStyle(color: AppColors.lightSurface),
+        ),
+      );
     }
     if (_filteredPlayers.isEmpty) {
-      return const Center(child: Text('No se han encontrado jugadores con ese nombre.'));
+      return const Center(
+        child: Text(
+          'No se han encontrado jugadores con ese nombre.',
+          style: TextStyle(color: AppColors.lightSurface),
+        ),
+      );
     }
 
     return ListView.builder(
@@ -145,9 +176,12 @@ class _PlayersTabScreenState extends State<PlayersTabScreen> {
       itemBuilder: (context, index) {
         final player = _filteredPlayers[index];
         final hasImage = player.image != null && player.image!.isNotEmpty;
-        final fullImageUrl = hasImage ? '${ApiConfig.serverUrl}${player.image}' : null;
+        final fullImageUrl = hasImage
+            ? '${ApiConfig.serverUrl}${player.image}'
+            : null;
 
         return Card(
+          color: AppColors.darkBackground.withAlpha(200),
           margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
           child: ListTile(
             onTap: () {
@@ -162,16 +196,24 @@ class _PlayersTabScreenState extends State<PlayersTabScreen> {
               );
             },
             leading: CircleAvatar(
+              backgroundColor: AppColors.lightSurface,
               backgroundImage: hasImage
                   ? NetworkImage(fullImageUrl!)
-                  : const AssetImage('assets/images/default_player.png') as ImageProvider,
+                  : const AssetImage('assets/images/default_player.png')
+                        as ImageProvider,
               onBackgroundImageError: (_, __) {},
             ),
-            title: Text(player.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(
+              player.name,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppColors.lightSurface,
+              ),
+            ),
             trailing: Text(
               '${player.totalPoints} pts',
-              style: TextStyle(
-                color: Theme.of(context).primaryColor,
+              style: const TextStyle(
+                color: AppColors.secondaryAccent,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),

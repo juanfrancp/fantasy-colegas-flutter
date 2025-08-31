@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fantasy_colegas_app/domain/services/auth_service.dart';
+import 'package:fantasy_colegas_app/core/config/app_colors.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -24,7 +25,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void _showError(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.primaryAccent,
+      ),
     );
   }
 
@@ -32,7 +36,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    setState(() { _isLoading = true; });
+    setState(() {
+      _isLoading = true;
+    });
 
     final bool success = await _authService.register(
       _usernameController.text.trim(),
@@ -41,13 +47,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
 
     if (!mounted) return;
-    setState(() { _isLoading = false; });
+    setState(() {
+      _isLoading = false;
+    });
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('¡Registro completado! Ahora puedes iniciar sesión.'),
-          backgroundColor: Colors.green,
+          backgroundColor: AppColors.secondaryAccent,
         ),
       );
       Navigator.of(context).pop();
@@ -59,7 +67,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Crear Cuenta')),
+      backgroundColor: AppColors.darkBackground,
+      appBar: AppBar(
+        title: const Text('Crear Cuenta'),
+        backgroundColor: AppColors.darkBackground,
+        foregroundColor: AppColors.lightSurface,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: AppColors.lightSurface),
+      ),
       body: Center(
         child: Form(
           key: _formKey,
@@ -71,10 +86,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
               children: <Widget>[
                 TextFormField(
                   controller: _usernameController,
-                  decoration: const InputDecoration(
+                  style: const TextStyle(color: AppColors.lightSurface),
+                  decoration: InputDecoration(
                     labelText: 'Nombre de usuario',
-                    prefixIcon: Icon(Icons.person_outline),
-                    border: OutlineInputBorder(),
+                    labelStyle: const TextStyle(
+                      color: AppColors.secondaryAccent,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.person_outline,
+                      color: AppColors.secondaryAccent,
+                    ),
+                    border: const OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: AppColors.secondaryAccent.withAlpha(100),
+                      ),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.lightSurface),
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -95,10 +125,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 16.0),
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
+                  style: const TextStyle(color: AppColors.lightSurface),
+                  decoration: InputDecoration(
                     labelText: 'Email',
-                    prefixIcon: Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(),
+                    labelStyle: const TextStyle(
+                      color: AppColors.secondaryAccent,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.email_outlined,
+                      color: AppColors.secondaryAccent,
+                    ),
+                    border: const OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: AppColors.secondaryAccent.withAlpha(100),
+                      ),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.lightSurface),
+                    ),
                   ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
@@ -117,15 +162,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: !_isPasswordVisible,
+                  style: const TextStyle(color: AppColors.lightSurface),
                   decoration: InputDecoration(
                     labelText: 'Contraseña',
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    labelStyle: const TextStyle(
+                      color: AppColors.secondaryAccent,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.lock_outline,
+                      color: AppColors.secondaryAccent,
+                    ),
                     border: const OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: AppColors.secondaryAccent.withAlpha(100),
+                      ),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.lightSurface),
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _isPasswordVisible
                             ? Icons.visibility_off
                             : Icons.visibility,
+                        color: AppColors.secondaryAccent,
                       ),
                       onPressed: () => setState(
                         () => _isPasswordVisible = !_isPasswordVisible,
@@ -146,15 +207,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: !_isConfirmPasswordVisible,
+                  style: const TextStyle(color: AppColors.lightSurface),
                   decoration: InputDecoration(
                     labelText: 'Confirmar Contraseña',
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    labelStyle: const TextStyle(
+                      color: AppColors.secondaryAccent,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.lock_outline,
+                      color: AppColors.secondaryAccent,
+                    ),
                     border: const OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: AppColors.secondaryAccent.withAlpha(100),
+                      ),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.lightSurface),
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _isConfirmPasswordVisible
                             ? Icons.visibility_off
                             : Icons.visibility,
+                        color: AppColors.secondaryAccent,
                       ),
                       onPressed: () => setState(
                         () => _isConfirmPasswordVisible =
@@ -176,6 +253,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : _handleRegister,
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryAccent,
+                    foregroundColor: AppColors.pureWhite,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -187,7 +266,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           width: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 3,
-                            color: Colors.white,
+                            color: AppColors.pureWhite,
                           ),
                         )
                       : const Text(

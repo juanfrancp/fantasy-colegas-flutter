@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fantasy_colegas_app/domain/services/auth_service.dart';
 import 'package:fantasy_colegas_app/presentation/home/home_screen.dart';
 import 'package:fantasy_colegas_app/presentation/auth/register_screen.dart';
+import 'package:fantasy_colegas_app/core/config/app_colors.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,15 +26,23 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    setState(() { _isLoading = true; });
+    setState(() {
+      _isLoading = true;
+    });
 
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    final bool success = await _authService.login(email, password, rememberMe: _rememberMe);
+    final bool success = await _authService.login(
+      email,
+      password,
+      rememberMe: _rememberMe,
+    );
 
     if (!mounted) return;
-    setState(() { _isLoading = false; });
+    setState(() {
+      _isLoading = false;
+    });
 
     if (success) {
       Navigator.of(context).pushReplacement(
@@ -42,8 +51,9 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Error: Usuario o contraseña incorrectos'),
-            backgroundColor: Colors.red),
+          content: Text('Error: Usuario o contraseña incorrectos'),
+          backgroundColor: AppColors.primaryAccent,
+        ),
       );
     }
   }
@@ -51,8 +61,12 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.darkBackground,
       appBar: AppBar(
         title: const Text('Iniciar Sesión'),
+        backgroundColor: AppColors.darkBackground,
+        foregroundColor: AppColors.lightSurface,
+        elevation: 0,
       ),
       body: Center(
         child: Form(
@@ -65,10 +79,25 @@ class _LoginScreenState extends State<LoginScreen> {
               children: <Widget>[
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
+                  style: const TextStyle(color: AppColors.lightSurface),
+                  decoration: InputDecoration(
                     labelText: 'Email o Usuario',
-                    prefixIcon: Icon(Icons.person_outline),
-                    border: OutlineInputBorder(),
+                    labelStyle: const TextStyle(
+                      color: AppColors.secondaryAccent,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.person_outline,
+                      color: AppColors.secondaryAccent,
+                    ),
+                    border: const OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: AppColors.secondaryAccent.withAlpha(100),
+                      ),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.lightSurface),
+                    ),
                   ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
@@ -82,13 +111,35 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: !_isPasswordVisible,
+                  style: const TextStyle(color: AppColors.lightSurface),
                   decoration: InputDecoration(
                     labelText: 'Contraseña',
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    labelStyle: const TextStyle(
+                      color: AppColors.secondaryAccent,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.lock_outline,
+                      color: AppColors.secondaryAccent,
+                    ),
                     border: const OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: AppColors.secondaryAccent.withAlpha(100),
+                      ),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.lightSurface),
+                    ),
                     suffixIcon: IconButton(
-                      icon: Icon(_isPasswordVisible ? Icons.visibility_off : Icons.visibility),
-                      onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                      icon: Icon(
+                        _isPasswordVisible
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: AppColors.secondaryAccent,
+                      ),
+                      onPressed: () => setState(
+                        () => _isPasswordVisible = !_isPasswordVisible,
+                      ),
                     ),
                   ),
                   validator: (value) {
@@ -105,14 +156,21 @@ class _LoginScreenState extends State<LoginScreen> {
                       _rememberMe = value ?? false;
                     });
                   },
-                  title: const Text('Mantener sesión iniciada'),
+                  title: const Text(
+                    'Mantener sesión iniciada',
+                    style: TextStyle(color: AppColors.lightSurface),
+                  ),
                   controlAffinity: ListTileControlAffinity.leading,
                   contentPadding: EdgeInsets.zero,
+                  activeColor: AppColors.primaryAccent,
+                  checkColor: AppColors.darkBackground,
                 ),
                 const SizedBox(height: 16.0),
                 ElevatedButton(
                   onPressed: _isLoading ? null : _handleLogin,
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryAccent,
+                    foregroundColor: AppColors.pureWhite,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -122,7 +180,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       ? const SizedBox(
                           height: 24,
                           width: 24,
-                          child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            color: AppColors.pureWhite,
+                          ),
                         )
                       : const Text('Entrar', style: TextStyle(fontSize: 16)),
                 ),
@@ -130,9 +191,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => const RegisterScreen(),
+                      ),
                     );
                   },
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.secondaryAccent,
+                  ),
                   child: const Text('¿No tienes cuenta? Regístrate'),
                 ),
               ],

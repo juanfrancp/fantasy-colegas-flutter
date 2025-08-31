@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:fantasy_colegas_app/domain/services/player_service.dart';
+import 'package:fantasy_colegas_app/core/config/app_colors.dart';
 
 class CreatePlayerScreen extends StatefulWidget {
   final int leagueId;
@@ -33,11 +34,13 @@ class _CreatePlayerScreenState extends State<CreatePlayerScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    
+
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
-    setState(() { _isLoading = true; });
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       await _playerService.createPlayer(
@@ -45,19 +48,28 @@ class _CreatePlayerScreenState extends State<CreatePlayerScreen> {
         name: _nameController.text,
         imageFile: _selectedImage,
       );
-      
+
       messenger.showSnackBar(
-        const SnackBar(content: Text('¡Jugador creado con éxito!'), backgroundColor: Colors.green),
+        const SnackBar(
+          content: Text('¡Jugador creado con éxito!'),
+          backgroundColor: AppColors.secondaryAccent,
+        ),
       );
       navigator.pop(true);
-      
     } catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString().replaceFirst("Exception: ", "")}'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text(
+            'Error: ${e.toString().replaceFirst("Exception: ", "")}',
+          ),
+          backgroundColor: AppColors.primaryAccent,
+        ),
       );
     } finally {
       if (mounted) {
-        setState(() { _isLoading = false; });
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -65,8 +77,14 @@ class _CreatePlayerScreenState extends State<CreatePlayerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.darkBackground,
       appBar: AppBar(
-        title: const Text('Añadir Nuevo Jugador'),
+        title: const Text(
+          'Añadir Nuevo Jugador',
+          style: TextStyle(color: AppColors.lightSurface),
+        ),
+        backgroundColor: AppColors.darkBackground,
+        iconTheme: const IconThemeData(color: AppColors.lightSurface),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -80,7 +98,7 @@ class _CreatePlayerScreenState extends State<CreatePlayerScreen> {
                 child: Center(
                   child: CircleAvatar(
                     radius: 60,
-                    backgroundColor: Colors.grey.shade300,
+                    backgroundColor: AppColors.lightSurface,
                     child: _selectedImage != null
                         ? ClipOval(
                             child: Image.file(
@@ -93,27 +111,53 @@ class _CreatePlayerScreenState extends State<CreatePlayerScreen> {
                         : const Icon(
                             Icons.add_a_photo,
                             size: 50,
-                            color: Colors.white,
+                            color: AppColors.darkBackground,
                           ),
                   ),
                 ),
               ),
               const SizedBox(height: 8),
-              Center(child: TextButton(onPressed: _pickImage, child: const Text('Elegir imagen'))),
+              Center(
+                child: TextButton(
+                  onPressed: _pickImage,
+                  child: const Text(
+                    'Elegir imagen',
+                    style: TextStyle(color: AppColors.secondaryAccent),
+                  ),
+                ),
+              ),
               const SizedBox(height: 24),
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Nombre del Jugador', border: OutlineInputBorder()),
-                validator: (value) => value!.isEmpty ? 'El nombre es obligatorio' : null,
+                style: const TextStyle(color: AppColors.lightSurface),
+                decoration: InputDecoration(
+                  labelText: 'Nombre del Jugador',
+                  labelStyle: const TextStyle(color: AppColors.secondaryAccent),
+                  border: const OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: AppColors.secondaryAccent.withAlpha(100),
+                    ),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.lightSurface),
+                  ),
+                ),
+                validator: (value) =>
+                    value!.isEmpty ? 'El nombre es obligatorio' : null,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _isLoading ? null : _submitForm,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: AppColors.primaryAccent,
+                  foregroundColor: AppColors.pureWhite,
                 ),
                 child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? const CircularProgressIndicator(
+                        color: AppColors.pureWhite,
+                      )
                     : const Text('Añadir Jugador'),
               ),
             ],

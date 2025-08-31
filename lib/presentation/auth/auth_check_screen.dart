@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fantasy_colegas_app/presentation/home/home_screen.dart';
 import 'package:fantasy_colegas_app/presentation/auth/login_screen.dart';
+import 'package:fantasy_colegas_app/core/config/app_colors.dart';
 
 class AuthCheckScreen extends StatefulWidget {
   const AuthCheckScreen({super.key});
@@ -37,8 +38,9 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
+      backgroundColor: AppColors.darkBackground,
       body: Center(
-        child: CircularProgressIndicator(),
+        child: CircularProgressIndicator(color: AppColors.primaryAccent),
       ),
     );
   }

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:fantasy_colegas_app/core/config/app_colors.dart';
 
 class DeleteLeagueConfirmationDialog extends StatefulWidget {
   const DeleteLeagueConfirmationDialog({super.key});
 
   @override
-  State<DeleteLeagueConfirmationDialog> createState() => _DeleteLeagueConfirmationDialogState();
+  State<DeleteLeagueConfirmationDialog> createState() =>
+      _DeleteLeagueConfirmationDialogState();
 }
 
-class _DeleteLeagueConfirmationDialogState extends State<DeleteLeagueConfirmationDialog> {
+class _DeleteLeagueConfirmationDialogState
+    extends State<DeleteLeagueConfirmationDialog> {
   final TextEditingController _confirmationController = TextEditingController();
   bool _isButtonEnabled = false;
 
@@ -30,26 +33,45 @@ class _DeleteLeagueConfirmationDialogState extends State<DeleteLeagueConfirmatio
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('¿Estás seguro?'),
+      backgroundColor: AppColors.darkBackground,
+      title: const Text(
+        '¿Estás seguro?',
+        style: TextStyle(color: AppColors.lightSurface),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             'Esta acción es irreversible y borrará la liga, sus miembros y todos sus datos.',
-            style: TextStyle(fontSize: 14),
+            style: TextStyle(fontSize: 14, color: AppColors.lightSurface),
           ),
           const SizedBox(height: 16),
           const Text(
             'Para confirmar, escribe ELIMINAR en el siguiente campo:',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.lightSurface,
+            ),
           ),
           const SizedBox(height: 8),
           TextField(
             controller: _confirmationController,
-            decoration: const InputDecoration(
+            style: const TextStyle(color: AppColors.lightSurface),
+            decoration: InputDecoration(
               hintText: 'ELIMINAR',
-              border: OutlineInputBorder(),
+              hintStyle: TextStyle(
+                color: AppColors.lightSurface.withAlpha(150),
+              ),
+              border: const OutlineInputBorder(),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: AppColors.secondaryAccent.withAlpha(100),
+                ),
+              ),
+              focusedBorder: const OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.lightSurface),
+              ),
             ),
             autocorrect: false,
             textCapitalization: TextCapitalization.characters,
@@ -58,12 +80,18 @@ class _DeleteLeagueConfirmationDialogState extends State<DeleteLeagueConfirmatio
       ),
       actions: [
         TextButton(
-          child: const Text('Cancelar'),
+          child: const Text(
+            'Cancelar',
+            style: TextStyle(color: AppColors.secondaryAccent),
+          ),
           onPressed: () => Navigator.of(context).pop(false),
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: _isButtonEnabled ? Colors.red : Colors.grey,
+            backgroundColor: _isButtonEnabled
+                ? AppColors.primaryAccent
+                : Colors.grey,
+            foregroundColor: AppColors.pureWhite,
           ),
           onPressed: _isButtonEnabled
               ? () => Navigator.of(context).pop(true)

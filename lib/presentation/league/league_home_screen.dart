@@ -8,6 +8,7 @@ import 'tabs/team_tab_screen.dart';
 import 'tabs/standings_tab_screen.dart';
 import 'tabs/players_tab_screen.dart';
 import 'tabs/matches_tab_screen.dart';
+import 'package:fantasy_colegas_app/core/config/app_colors.dart';
 
 class LeagueHomeScreen extends StatefulWidget {
   final League initialLeague;
@@ -36,7 +37,9 @@ class _LeagueHomeScreenState extends State<LeagueHomeScreen> {
     try {
       final currentUser = await _userService.getMe();
       if (!mounted) return;
-      final isAdmin = _currentLeague.admins.any((admin) => admin.id == currentUser.id);
+      final isAdmin = _currentLeague.admins.any(
+        (admin) => admin.id == currentUser.id,
+      );
       setState(() {
         _isAdmin = isAdmin;
       });
@@ -51,8 +54,10 @@ class _LeagueHomeScreenState extends State<LeagueHomeScreen> {
 
   Future<void> _refreshLeagueData() async {
     try {
-      final updatedLeague = await _leagueService.getLeagueById(_currentLeague.id);
-      
+      final updatedLeague = await _leagueService.getLeagueById(
+        _currentLeague.id,
+      );
+
       if (mounted) {
         setState(() {
           _currentLeague = updatedLeague;
@@ -62,7 +67,13 @@ class _LeagueHomeScreenState extends State<LeagueHomeScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al actualizar la liga: ${e.toString().replaceFirst("Exception: ", "")}')),
+          SnackBar(
+            content: Text(
+              'Error al actualizar la liga: ${e.toString().replaceFirst("Exception: ", "")}',
+              style: const TextStyle(color: AppColors.pureWhite),
+            ),
+            backgroundColor: AppColors.primaryAccent,
+          ),
         );
       }
     }
@@ -75,11 +86,19 @@ class _LeagueHomeScreenState extends State<LeagueHomeScreen> {
       child: Scaffold(
         drawer: const AppDrawer(),
         appBar: AppBar(
-          title: Text(_currentLeague.name),
+          title: Text(
+            _currentLeague.name,
+            style: const TextStyle(color: AppColors.lightSurface),
+          ),
+          backgroundColor: AppColors.darkBackground,
+          iconTheme: const IconThemeData(color: AppColors.lightSurface),
           bottom: const TabBar(
             isScrollable: true,
             tabAlignment: TabAlignment.center,
             labelPadding: EdgeInsets.symmetric(horizontal: 12.0),
+            indicatorColor: AppColors.primaryAccent,
+            labelColor: AppColors.primaryAccent,
+            unselectedLabelColor: AppColors.lightSurface,
             tabs: [
               Tab(icon: Icon(Icons.home), text: 'Inicio'),
               Tab(icon: Icon(Icons.person), text: 'Equipo'),
@@ -91,7 +110,11 @@ class _LeagueHomeScreenState extends State<LeagueHomeScreen> {
         ),
         body: TabBarView(
           children: [
-            HomeTabScreen(league: _currentLeague, onLeagueUpdated: _refreshLeagueData, isAdmin: _isAdmin),
+            HomeTabScreen(
+              league: _currentLeague,
+              onLeagueUpdated: _refreshLeagueData,
+              isAdmin: _isAdmin,
+            ),
             TeamTabScreen(league: _currentLeague),
             StandingsTabScreen(league: _currentLeague),
             PlayersTabScreen(league: _currentLeague, isAdmin: _isAdmin),

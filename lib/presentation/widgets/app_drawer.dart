@@ -10,6 +10,7 @@ import 'package:fantasy_colegas_app/presentation/profile/profile_screen.dart';
 import 'package:fantasy_colegas_app/core/config/api_config.dart';
 import 'package:fantasy_colegas_app/presentation/league/join_league_screen.dart';
 import 'package:fantasy_colegas_app/presentation/league/create_league_screen.dart';
+import 'package:fantasy_colegas_app/core/config/app_colors.dart';
 
 class AppDrawer extends StatefulWidget {
   final VoidCallback? onLeaguesChanged;
@@ -34,7 +35,6 @@ class _AppDrawerState extends State<AppDrawer> {
     _userFuture = _userService.getMe();
   }
 
-
   Future<void> _handleLogout() async {
     await _authService.logout();
     if (!mounted) return;
@@ -46,9 +46,9 @@ class _AppDrawerState extends State<AppDrawer> {
 
   void _navigateToProfile() async {
     Navigator.pop(context);
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const ProfileScreen()),
-    );
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const ProfileScreen()));
     setState(() {
       _userFuture = _userService.getMe();
     });
@@ -99,10 +99,10 @@ class _AppDrawerState extends State<AppDrawer> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      backgroundColor: AppColors.darkBackground,
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
@@ -110,44 +110,77 @@ class _AppDrawerState extends State<AppDrawer> {
             future: _userFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const DrawerHeader(
-                  decoration: BoxDecoration(color: Colors.deepPurple),
-                  child: Center(child: CircularProgressIndicator(color: Colors.white)),
+                return Container(
+                  height: 180,
+                  alignment: Alignment.center,
+                  child: const CircularProgressIndicator(
+                    color: AppColors.primaryAccent,
+                  ),
                 );
               } else if (snapshot.hasData && snapshot.data != null) {
                 final user = snapshot.data!;
-                final hasImage = user.profileImageUrl != null && user.profileImageUrl!.isNotEmpty;
-                return UserAccountsDrawerHeader(
-                  accountName: Text(user.username),
-                  accountEmail: null,
-                  currentAccountPicture: CircleAvatar(
-                    backgroundImage: hasImage
-                        ? NetworkImage(ApiConfig.serverUrl + user.profileImageUrl!)
-                        : const AssetImage('assets/images/default_profile.png') as ImageProvider,
-                    backgroundColor: Colors.white,
-                  ),
-                  decoration: const BoxDecoration(
-                    color: Colors.deepPurple,
+                final hasImage =
+                    user.profileImageUrl != null &&
+                    user.profileImageUrl!.isNotEmpty;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24.0),
+                  child: Column(
+                    children: [
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundColor: AppColors.lightSurface,
+                        backgroundImage: hasImage
+                            ? NetworkImage(
+                                '${ApiConfig.serverUrl}${user.profileImageUrl!}',
+                              )
+                            : const AssetImage(
+                                    'assets/images/default_profile.png',
+                                  )
+                                  as ImageProvider,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        user.username,
+                        style: const TextStyle(
+                          color: AppColors.lightSurface,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ],
                   ),
                 );
               } else {
-                return const DrawerHeader(
-                  decoration: BoxDecoration(color: Colors.deepPurple),
-                  child: Text('Error al cargar perfil', style: TextStyle(color: Colors.white)),
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24.0),
+                  child: Text(
+                    'Error al cargar perfil',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppColors.primaryAccent),
+                  ),
                 );
               }
             },
           ),
           ListTile(
-            leading: const Icon(Icons.edit),
-            title: const Text('Modificar perfil'),
+            leading: const Icon(Icons.edit, color: AppColors.secondaryAccent),
+            title: const Text(
+              'Modificar perfil',
+              style: TextStyle(color: AppColors.lightSurface),
+            ),
             onTap: _navigateToProfile,
           ),
-          const Divider(),
+          const Divider(color: AppColors.secondaryAccent),
 
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Text('Mis Ligas', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(
+              'Mis Ligas',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppColors.lightSurface,
+              ),
+            ),
           ),
           FutureBuilder<List<League>>(
             future: _leaguesFuture,
@@ -155,39 +188,53 @@ class _AppDrawerState extends State<AppDrawer> {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryAccent,
+                    ),
+                  ),
                 );
               } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                 return Column(
                   children: snapshot.data!.map((league) {
-                    final hasCustomImage = league.image != null && league.image!.isNotEmpty;
-                    final fullImageUrl = hasCustomImage ? '${ApiConfig.serverUrl}${league.image}' : null;
-                    
+                    final hasCustomImage =
+                        league.image != null && league.image!.isNotEmpty;
+                    final fullImageUrl = hasCustomImage
+                        ? '${ApiConfig.serverUrl}${league.image}'
+                        : null;
+
                     return ListTile(
                       leading: CircleAvatar(
                         radius: 20,
-                        backgroundColor: Colors.grey.shade200,
+                        backgroundColor: AppColors.lightSurface,
                         child: ClipOval(
                           child: hasCustomImage
-                            ? Image.network(
-                                fullImageUrl!,
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Image.asset(
-                                    'assets/images/default_league.png',
-                                    width: 40, height: 40, fit: BoxFit.cover,
-                                  );
-                                },
-                              )
-                            : Image.asset(
-                                'assets/images/default_league.png',
-                                width: 40, height: 40, fit: BoxFit.cover,
-                              ),
+                              ? Image.network(
+                                  fullImageUrl!,
+                                  width: 40,
+                                  height: 40,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Image.asset(
+                                      'assets/images/default_league.png',
+                                      width: 40,
+                                      height: 40,
+                                      fit: BoxFit.cover,
+                                    );
+                                  },
+                                )
+                              : Image.asset(
+                                  'assets/images/default_league.png',
+                                  width: 40,
+                                  height: 40,
+                                  fit: BoxFit.cover,
+                                ),
                         ),
                       ),
-                      title: Text(league.name),
+                      title: Text(
+                        league.name,
+                        style: const TextStyle(color: AppColors.lightSurface),
+                      ),
                       onTap: () => _navigateToLeague(league),
                     );
                   }).toList(),
@@ -197,25 +244,46 @@ class _AppDrawerState extends State<AppDrawer> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.group_add),
-            title: const Text('Únete a una liga'),
+            leading: const Icon(
+              Icons.group_add,
+              color: AppColors.secondaryAccent,
+            ),
+            title: const Text(
+              'Únete a una liga',
+              style: TextStyle(color: AppColors.lightSurface),
+            ),
             onTap: _navigateToJoinLeagueScreen,
           ),
           ListTile(
-            leading: const Icon(Icons.add_circle_outline),
-            title: const Text('Crea una liga'),
+            leading: const Icon(
+              Icons.add_circle_outline,
+              color: AppColors.secondaryAccent,
+            ),
+            title: const Text(
+              'Crea una liga',
+              style: TextStyle(color: AppColors.lightSurface),
+            ),
             onTap: _navigateToCreateLeagueScreen,
           ),
-          const Divider(),
+          const Divider(color: AppColors.secondaryAccent),
 
           ListTile(
-            leading: const Icon(Icons.email_rounded),
-            title: const Text('Envia tus comentarios.'),
+            leading: const Icon(
+              Icons.email_rounded,
+              color: AppColors.secondaryAccent,
+            ),
+            title: const Text(
+              'Envía tus comentarios',
+              style: TextStyle(color: AppColors.lightSurface),
+            ),
           ),
 
           ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Cerrar sesión'),
+            leading: const Icon(Icons.logout, color: AppColors.secondaryAccent),
+            title: const Text(
+              'Cerrar sesión',
+              style: TextStyle(color: AppColors.lightSurface),
+            ),
             onTap: _handleLogout,
           ),
         ],

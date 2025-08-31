@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:fantasy_colegas_app/domain/services/league_service.dart';
+import 'package:fantasy_colegas_app/core/config/app_colors.dart';
 
 class CreateLeagueScreen extends StatefulWidget {
   const CreateLeagueScreen({super.key});
@@ -60,9 +61,11 @@ class _CreateLeagueScreenState extends State<CreateLeagueScreen> {
           );
         } catch (e) {
           scaffoldMessenger.showSnackBar(
-            const SnackBar(
-              content: Text('La liga se creó, pero falló la subida de la imagen.'),
-              backgroundColor: Colors.orange,
+            SnackBar(
+              content: const Text(
+                'La liga se creó, pero falló la subida de la imagen.',
+              ),
+              backgroundColor: AppColors.secondaryAccent.withAlpha(200),
             ),
           );
         }
@@ -70,16 +73,18 @@ class _CreateLeagueScreenState extends State<CreateLeagueScreen> {
 
       scaffoldMessenger.showSnackBar(
         const SnackBar(
-            content: Text('¡Liga creada con éxito!'),
-            backgroundColor: Colors.green),
+          content: Text('¡Liga creada con éxito!'),
+          backgroundColor: AppColors.secondaryAccent,
+        ),
       );
       navigator.pop(true);
-
     } catch (e) {
       scaffoldMessenger.showSnackBar(
         SnackBar(
-          content: Text('Error: ${e.toString().replaceFirst("Exception: ", "")}'),
-          backgroundColor: Colors.red,
+          content: Text(
+            'Error: ${e.toString().replaceFirst("Exception: ", "")}',
+          ),
+          backgroundColor: AppColors.primaryAccent,
         ),
       );
     } finally {
@@ -94,8 +99,14 @@ class _CreateLeagueScreenState extends State<CreateLeagueScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.darkBackground,
       appBar: AppBar(
-        title: const Text('Crear Nueva Liga'),
+        title: const Text(
+          'Crear Nueva Liga',
+          style: TextStyle(color: AppColors.lightSurface),
+        ),
+        backgroundColor: AppColors.darkBackground,
+        iconTheme: const IconThemeData(color: AppColors.lightSurface),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -108,41 +119,78 @@ class _CreateLeagueScreenState extends State<CreateLeagueScreen> {
                 onTap: _pickImage,
                 child: CircleAvatar(
                   radius: 60,
-                  backgroundColor: Colors.grey.shade300,
+                  backgroundColor: AppColors.lightSurface,
                   child: ClipOval(
                     child: _selectedImage != null
-                      ? Image.file(
-                          _selectedImage!,
-                          width: 120,
-                          height: 120,
-                          fit: BoxFit.cover,
-                        )
-                      : Image.asset(
-                          'assets/images/default_league.png',
-                          width: 120,
-                          height: 120,
-                          fit: BoxFit.cover,
-                        ),
+                        ? Image.file(
+                            _selectedImage!,
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.cover,
+                          )
+                        : Image.asset(
+                            'assets/images/default_league.png',
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                 ),
               ),
               const SizedBox(height: 8),
-              Center(child: TextButton(onPressed: _pickImage, child: const Text('Elegir imagen'))),
+              Center(
+                child: TextButton(
+                  onPressed: _pickImage,
+                  child: const Text(
+                    'Elegir imagen',
+                    style: TextStyle(color: AppColors.secondaryAccent),
+                  ),
+                ),
+              ),
               const SizedBox(height: 24),
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Nombre de la Liga', border: OutlineInputBorder()),
-                validator: (value) => value!.isEmpty ? 'El nombre es obligatorio' : null,
+                style: const TextStyle(color: AppColors.lightSurface),
+                decoration: InputDecoration(
+                  labelText: 'Nombre de la Liga',
+                  labelStyle: const TextStyle(color: AppColors.secondaryAccent),
+                  border: const OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: AppColors.secondaryAccent.withAlpha(100),
+                    ),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.lightSurface),
+                  ),
+                ),
+                validator: (value) =>
+                    value!.isEmpty ? 'El nombre es obligatorio' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Descripción (Opcional)', border: OutlineInputBorder()),
+                style: const TextStyle(color: AppColors.lightSurface),
+                decoration: InputDecoration(
+                  labelText: 'Descripción (Opcional)',
+                  labelStyle: const TextStyle(color: AppColors.secondaryAccent),
+                  border: const OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: AppColors.secondaryAccent.withAlpha(100),
+                    ),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.lightSurface),
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
               Text(
                 'Tamaño del Equipo: ${_currentSliderValue.round()}',
-                style: Theme.of(context).textTheme.titleMedium,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: AppColors.lightSurface,
+                ),
               ),
               Slider(
                 value: _currentSliderValue,
@@ -155,24 +203,34 @@ class _CreateLeagueScreenState extends State<CreateLeagueScreen> {
                     _currentSliderValue = value;
                   });
                 },
+                activeColor: AppColors.primaryAccent,
+                inactiveColor: AppColors.secondaryAccent.withAlpha(150),
               ),
               SwitchListTile(
-                title: const Text('Liga Privada'),
+                title: const Text(
+                  'Liga Privada',
+                  style: TextStyle(color: AppColors.lightSurface),
+                ),
                 value: _isPrivate,
                 onChanged: (bool value) {
                   setState(() {
                     _isPrivate = value;
                   });
                 },
+                activeColor: AppColors.primaryAccent,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _isLoading ? null : _submitForm,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: AppColors.primaryAccent,
+                  foregroundColor: AppColors.pureWhite,
                 ),
                 child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? const CircularProgressIndicator(
+                        color: AppColors.pureWhite,
+                      )
                     : const Text('Crear Liga'),
               ),
             ],

@@ -4,6 +4,7 @@ import 'package:fantasy_colegas_app/data/models/league.dart';
 import 'package:fantasy_colegas_app/domain/services/league_service.dart';
 import 'package:fantasy_colegas_app/presentation/league/widgets/league_join_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:fantasy_colegas_app/core/config/app_colors.dart';
 
 class JoinLeagueScreen extends StatefulWidget {
   const JoinLeagueScreen({super.key});
@@ -179,8 +180,14 @@ class _JoinLeagueScreenState extends State<JoinLeagueScreen> {
         Navigator.of(context).pop(_actionTaken);
       },
       child: Scaffold(
+        backgroundColor: AppColors.darkBackground,
         appBar: AppBar(
-          title: const Text('Unirse a una Liga'),
+          title: const Text(
+            'Unirse a una Liga',
+            style: TextStyle(color: AppColors.lightSurface),
+          ),
+          backgroundColor: AppColors.darkBackground,
+          iconTheme: const IconThemeData(color: AppColors.lightSurface),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -188,21 +195,50 @@ class _JoinLeagueScreenState extends State<JoinLeagueScreen> {
             children: [
               TextField(
                 controller: _nameSearchController,
-                decoration: const InputDecoration(
+                style: const TextStyle(color: AppColors.lightSurface),
+                decoration: InputDecoration(
                   labelText: 'Buscar por nombre',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(),
+                  labelStyle: const TextStyle(color: AppColors.secondaryAccent),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: AppColors.secondaryAccent,
+                  ),
+                  border: const OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: AppColors.secondaryAccent.withAlpha(100),
+                    ),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.lightSurface),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _codeSearchController,
+                style: const TextStyle(color: AppColors.lightSurface),
                 decoration: InputDecoration(
                   labelText: 'Buscar por código de liga',
-                  prefixIcon: const Icon(Icons.vpn_key),
+                  labelStyle: const TextStyle(color: AppColors.secondaryAccent),
+                  prefixIcon: const Icon(
+                    Icons.vpn_key,
+                    color: AppColors.secondaryAccent,
+                  ),
                   border: const OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: AppColors.secondaryAccent.withAlpha(100),
+                    ),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.lightSurface),
+                  ),
                   suffixIcon: IconButton(
-                    icon: const Icon(Icons.search),
+                    icon: const Icon(
+                      Icons.search,
+                      color: AppColors.secondaryAccent,
+                    ),
                     onPressed: _searchLeagueByCode,
                   ),
                 ),
@@ -210,48 +246,75 @@ class _JoinLeagueScreenState extends State<JoinLeagueScreen> {
               const SizedBox(height: 24),
               Expanded(
                 child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryAccent,
+                        ),
+                      )
                     : _errorMessage.isNotEmpty
-                        ? Center(child: Text(_errorMessage))
-                        : ListView.builder(
-                            itemCount: _leagues.length,
-                            itemBuilder: (context, index) {
-                              final league = _leagues[index];
-                              final hasCustomImage = league.image != null && league.image!.isNotEmpty;
-                              final fullImageUrl = hasCustomImage ? '${ApiConfig.serverUrl}${league.image}' : null;
-
-                              return Card(
-                                child: ListTile(
-                                  leading: CircleAvatar(
-                                    radius: 25,
-                                    backgroundColor: Colors.grey.shade200,
-                                    child: ClipOval(
-                                      child: hasCustomImage
-                                        ? Image.network(
-                                            fullImageUrl!,
-                                            width: 50,
-                                            height: 50,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) {
-                                              return Image.asset(
-                                                'assets/images/default_league.png',
-                                                fit: BoxFit.cover,
-                                              );
-                                            },
-                                          )
-                                        : Image.asset(
-                                            'assets/images/default_league.png',
-                                            fit: BoxFit.cover,
-                                          ),
-                                    ),
-                                  ),
-                                  title: Text(league.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                  subtitle: Text(league.description ?? 'Sin descripción'),
-                                  onTap: () => _onLeagueSelected(league),
-                                ),
-                              );
-                            },
+                    ? Center(
+                        child: Text(
+                          _errorMessage,
+                          style: const TextStyle(
+                            color: AppColors.primaryAccent,
                           ),
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: _leagues.length,
+                        itemBuilder: (context, index) {
+                          final league = _leagues[index];
+                          final hasCustomImage =
+                              league.image != null && league.image!.isNotEmpty;
+                          final fullImageUrl = hasCustomImage
+                              ? '${ApiConfig.serverUrl}${league.image}'
+                              : null;
+
+                          return Card(
+                            color: AppColors.darkBackground.withAlpha(200),
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                radius: 25,
+                                backgroundColor: AppColors.lightSurface,
+                                child: ClipOval(
+                                  child: hasCustomImage
+                                      ? Image.network(
+                                          fullImageUrl!,
+                                          width: 50,
+                                          height: 50,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                                return Image.asset(
+                                                  'assets/images/default_league.png',
+                                                  fit: BoxFit.cover,
+                                                );
+                                              },
+                                        )
+                                      : Image.asset(
+                                          'assets/images/default_league.png',
+                                          fit: BoxFit.cover,
+                                        ),
+                                ),
+                              ),
+                              title: Text(
+                                league.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.lightSurface,
+                                ),
+                              ),
+                              subtitle: Text(
+                                league.description ?? 'Sin descripción',
+                                style: const TextStyle(
+                                  color: AppColors.pureWhite,
+                                ),
+                              ),
+                              onTap: () => _onLeagueSelected(league),
+                            ),
+                          );
+                        },
+                      ),
               ),
             ],
           ),
