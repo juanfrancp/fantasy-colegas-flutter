@@ -400,7 +400,7 @@ class _ManageLeagueScreenState extends State<ManageLeagueScreen> {
                       ),
                       value: _isPrivate,
                       onChanged: _onPrivacyChanged,
-                      activeColor: AppColors.primaryAccent,
+                      activeThumbColor: AppColors.primaryAccent,
                     ),
 
                     const SizedBox(height: 32),

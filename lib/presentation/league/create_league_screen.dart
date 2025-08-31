@@ -217,7 +217,7 @@ class _CreateLeagueScreenState extends State<CreateLeagueScreen> {
                     _isPrivate = value;
                   });
                 },
-                activeColor: AppColors.primaryAccent,
+                activeThumbColor: AppColors.primaryAccent,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
