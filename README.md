@@ -1,16 +1,14 @@
-# fantasy_colegas_app
+# Fantasy Colegas Backend
 
-A new Flutter project.
+API REST desarrollada con **Java 17** y **Spring Boot 3** para la gestión de ligas deportivas fantasy.
 
-## Getting Started
+## Tecnologías Clave
+* **Core:** Java, Spring Boot (Web, Security, Data JPA).
+* **Seguridad:** Implementación de JWT (JSON Web Tokens) para autenticación stateless.
+* **Base de Datos:** H2 (Desarrollo) / MySQL (Producción), Hibernate.
+* **Testing:** JUnit (Unit testing de controladores y servicios).
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Funcionalidades Principales
+* Gestión completa de usuarios, ligas y equipos.
+* Algoritmo de cálculo de puntuaciones basado en estadísticas de partidos.
+* Endpoints seguros para consumo móvil.
