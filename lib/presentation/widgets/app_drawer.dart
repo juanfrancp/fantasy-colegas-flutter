@@ -12,6 +12,8 @@ import 'package:fantasy_colegas_app/presentation/league/join_league_screen.dart'
 import 'package:fantasy_colegas_app/presentation/league/create_league_screen.dart';
 import 'package:fantasy_colegas_app/core/config/app_colors.dart';
 
+import 'package:fantasy_colegas_app/presentation/profile/send_feedback_screen.dart';
+
 class AppDrawer extends StatefulWidget {
   final VoidCallback? onLeaguesChanged;
 
@@ -97,6 +99,14 @@ class _AppDrawerState extends State<AppDrawer> {
         });
       }
     }
+  }
+
+  // 2. AÑADIMOS ESTE MÉTODO DE NAVEGACIÓN
+  void _navigateToSendFeedback() {
+    Navigator.pop(context); // Cerramos el drawer primero
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const SendFeedbackScreen()),
+    );
   }
 
   @override
@@ -267,6 +277,7 @@ class _AppDrawerState extends State<AppDrawer> {
           ),
           const Divider(color: AppColors.secondaryAccent),
 
+          // 3. AÑADIMOS EL ONTAP AQUÍ
           ListTile(
             leading: const Icon(
               Icons.email_rounded,
@@ -276,6 +287,7 @@ class _AppDrawerState extends State<AppDrawer> {
               'Envía tus comentarios',
               style: TextStyle(color: AppColors.lightSurface),
             ),
+            onTap: _navigateToSendFeedback, // <--- ESTO FALTABA
           ),
 
           ListTile(
