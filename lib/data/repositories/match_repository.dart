@@ -64,4 +64,11 @@ class MatchRepository {
       );
     });
   }
+
+  Future<Match> getMatchById(int id) async {
+    return _executeWithAuth((token) async {
+      final response = await _client(token).get('matches/$id');
+      return Match.fromJson(response);
+    });
+  }
 }

@@ -25,4 +25,8 @@ class MatchService {
   Future<void> submitMatchStats(int matchId, int homeScore, int awayScore, List<PlayerMatchStatsUpdate> stats) {
     return _matchRepository.submitMatchStats(matchId, homeScore, awayScore, stats);
   }
+
+  Future<Match> getMatch(int id) {
+    return _matchRepository.getMatchById(id);
+  }
 }

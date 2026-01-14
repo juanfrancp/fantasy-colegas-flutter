@@ -6,11 +6,13 @@ import 'package:fantasy_colegas_app/core/config/app_colors.dart';
 class PastMatchView extends StatelessWidget {
   final Match match;
   final bool isAdmin;
+  final VoidCallback onMatchUpdated;
 
   const PastMatchView({
     super.key,
     required this.match,
     required this.isAdmin,
+    required this.onMatchUpdated,
   });
 
   // Determina si el partido tiene resultados introducidos
@@ -39,7 +41,7 @@ class PastMatchView extends StatelessWidget {
                 
                 // Si devuelve true, es que se guardaron datos, recarga la pantalla si es necesario
                 if (result == true) {
-                  // Lógica para recargar la vista (ej. volver a llamar al provider o setState)
+                  onMatchUpdated();
                 }
               },
               icon: const Icon(Icons.add_chart),
@@ -80,23 +82,40 @@ class PastMatchView extends StatelessWidget {
   }
 
   Widget _buildResultsList() {
-    // TODO: Reemplazar esto con los datos reales de puntos por jugador
     final allPlayers = [...match.homeTeam.players, ...match.awayTeam.players];
 
     return ListView.builder(
       itemCount: allPlayers.length,
       itemBuilder: (context, index) {
         final player = allPlayers[index];
+        // Formatear puntos para quitar decimales .0 si es entero
+        String pointsText = player.totalPoints % 1 == 0 
+            ? player.totalPoints.toInt().toString() 
+            : player.totalPoints.toStringAsFixed(1);
+
         return Card(
-          color: AppColors.lightSurface.withAlpha(20),
+          color: AppColors.lightSurface.withValues(alpha: 0.1), // Usando sintaxis nueva
+          margin: const EdgeInsets.symmetric(vertical: 4),
           child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: AppColors.secondaryAccent,
+              child: Text(player.name[0], style: const TextStyle(fontWeight: FontWeight.bold)),
+            ),
             title: Text(player.name, style: const TextStyle(color: AppColors.lightSurface)),
-            trailing: const Text(
-              '10 Pts', // Dato de ejemplo
-              style: TextStyle(
-                color: AppColors.secondaryAccent,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+            trailing: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.primaryAccent.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.primaryAccent),
+              ),
+              child: Text(
+                '$pointsText Pts', // <--- 3. DATO REAL
+                style: const TextStyle(
+                  color: AppColors.primaryAccent,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
             ),
           ),
