@@ -56,4 +56,25 @@ class RosterRepository {
 
     return response.statusCode == 200;
   }
+  
+  Future<bool> addPlayer({
+    required int leagueId,
+    required int playerToAddId,
+    required String position,
+    required String token,
+  }) async {
+    final response = await http.put(
+      Uri.parse('${ApiConfig.baseUrl}/leagues/$leagueId/rosters/players'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'playerId': playerToAddId,
+        'position': position,
+      }),
+    );
+
+    return response.statusCode == 200;
+  }
 }

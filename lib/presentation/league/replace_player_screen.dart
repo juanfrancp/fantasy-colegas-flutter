@@ -35,16 +35,19 @@ class _ReplacePlayerScreenState extends State<ReplacePlayerScreen> {
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
+    final position = widget.playerToReplace.role; 
+
     final success = await _rosterService.replacePlayer(
       leagueId: widget.leagueId,
       playerToRemoveId: widget.playerToReplace.playerId,
       playerToAddId: selectedPlayer.id,
+      position: position,
     );
 
     if (success) {
       messenger.showSnackBar(
         const SnackBar(
-          content: Text('¡Jugador reemplazado!'),
+          content: Text('¡Jugador actualizado!'),
           backgroundColor: AppColors.secondaryAccent,
         ),
       );
@@ -52,7 +55,7 @@ class _ReplacePlayerScreenState extends State<ReplacePlayerScreen> {
     } else {
       messenger.showSnackBar(
         const SnackBar(
-          content: Text('Error al reemplazar el jugador.'),
+          content: Text('Error al actualizar el jugador.'),
           backgroundColor: AppColors.primaryAccent,
         ),
       );

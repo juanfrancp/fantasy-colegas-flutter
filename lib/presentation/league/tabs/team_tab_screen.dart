@@ -27,15 +27,6 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
   }
 
   void _navigateToReplacePlayer(RosterPlayer playerToReplace) async {
-    if (playerToReplace.playerId == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No puedes cambiar un hueco vacío.'),
-          backgroundColor: AppColors.primaryAccent,
-        ),
-      );
-      return;
-    }
     final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (context) => ReplacePlayerScreen(

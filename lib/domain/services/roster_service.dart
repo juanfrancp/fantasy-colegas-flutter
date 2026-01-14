@@ -26,15 +26,27 @@ class RosterService {
     required int leagueId,
     required int playerToRemoveId,
     required int playerToAddId,
+    String? position,
   }) async {
     final token = await _authService.getToken();
     if (token == null) throw Exception('Token no encontrado');
 
-    return _rosterRepository.replacePlayer(
-      leagueId: leagueId,
-      playerToRemoveId: playerToRemoveId,
-      playerToAddId: playerToAddId,
-      token: token,
-    );
+    if (playerToRemoveId == 0 || playerToRemoveId == 1) {
+      if (position == null) throw Exception('Se requiere posición para añadir un jugador');
+      
+      return _rosterRepository.addPlayer(
+        leagueId: leagueId,
+        playerToAddId: playerToAddId,
+        position: position,
+        token: token,
+      );
+    } else {
+      return _rosterRepository.replacePlayer(
+        leagueId: leagueId,
+        playerToRemoveId: playerToRemoveId,
+        playerToAddId: playerToAddId,
+        token: token,
+      );
+    }
   }
 }
