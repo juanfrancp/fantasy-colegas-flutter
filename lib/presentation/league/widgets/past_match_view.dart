@@ -1,4 +1,5 @@
 import 'package:fantasy_colegas_app/data/models/match.dart';
+import 'package:fantasy_colegas_app/presentation/league/enter_match_results_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fantasy_colegas_app/core/config/app_colors.dart';
 
@@ -28,8 +29,18 @@ class PastMatchView extends StatelessWidget {
           ),
           if (isAdmin && !_hasResults)
             ElevatedButton.icon(
-              onPressed: () {
-                // TODO: Navegar a la pantalla de introducir estadísticas
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EnterMatchResultsScreen(match: match),
+                  ),
+                );
+                
+                // Si devuelve true, es que se guardaron datos, recarga la pantalla si es necesario
+                if (result == true) {
+                  // Lógica para recargar la vista (ej. volver a llamar al provider o setState)
+                }
               },
               icon: const Icon(Icons.add_chart),
               label: const Text('Introducir Resultados'),

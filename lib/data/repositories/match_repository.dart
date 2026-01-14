@@ -2,6 +2,7 @@ import 'package:fantasy_colegas_app/data/models/match.dart';
 import 'package:fantasy_colegas_app/data/models/match_create.dart';
 import 'package:fantasy_colegas_app/core/api_client.dart';
 import 'package:fantasy_colegas_app/core/config/api_config.dart';
+import 'package:fantasy_colegas_app/data/models/player_match_stats_update.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MatchRepository {
@@ -42,12 +43,25 @@ class MatchRepository {
   }
 
   Future<Match> updateMatch(int matchId, MatchCreate matchData) async {
-  return _executeWithAuth((token) async {
-    final jsonResponse = await _client(token).put(
-      'matches/$matchId',
-      body: matchData.toJson(),
-    );
-    return Match.fromJson(jsonResponse);
-  });
-}
+    return _executeWithAuth((token) async {
+      final jsonResponse = await _client(token).put(
+        'matches/$matchId',
+        body: matchData.toJson(),
+      );
+      return Match.fromJson(jsonResponse);
+    });
+  }
+
+  Future<void> submitMatchStats(int matchId, int homeScore, int awayScore, List<PlayerMatchStatsUpdate> stats) async {
+    return _executeWithAuth((token) async {
+      await _client(token).post(
+        'matches/$matchId/stats',
+        body: { // Ahora enviamos un Mapa JSON con la estructura del DTO Java
+          'homeScore': homeScore,
+          'awayScore': awayScore,
+          'playerStats': stats.map((e) => e.toJson()).toList(),
+        },
+      );
+    });
+  }
 }
