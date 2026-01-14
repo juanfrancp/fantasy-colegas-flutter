@@ -142,6 +142,7 @@ class _ScheduleMatchScreenState extends State<ScheduleMatchScreen> {
                       onPressed: _submitForm,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryAccent,
+                        foregroundColor: AppColors.pureWhite,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       child: const Text('Programar Partido'),

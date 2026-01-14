@@ -48,6 +48,7 @@ class PastMatchView extends StatelessWidget {
               label: const Text('Introducir Resultados'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryAccent,
+                foregroundColor: AppColors.pureWhite,
                 minimumSize: const Size(double.infinity, 50),
               ),
             ),

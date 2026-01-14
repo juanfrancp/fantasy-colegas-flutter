@@ -6,12 +6,12 @@ import 'package:fantasy_colegas_app/data/repositories/match_repository.dart';
 class MatchService {
   final MatchRepository _matchRepository = MatchRepository();
 
-  Future<List<Match>> getUpcomingMatches() {
-    return _matchRepository.getUpcomingMatches();
+  Future<List<Match>> getUpcomingMatches(int leagueId) { // <--- Recibe ID
+    return _matchRepository.getUpcomingMatches(leagueId);
   }
 
-  Future<List<Match>> getPastMatches() {
-    return _matchRepository.getPastMatches();
+  Future<List<Match>> getPastMatches(int leagueId) { // <--- Recibe ID
+    return _matchRepository.getPastMatches(leagueId);
   }
 
   Future<void> createMatch(MatchCreate match) {

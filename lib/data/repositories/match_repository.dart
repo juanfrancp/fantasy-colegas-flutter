@@ -3,7 +3,7 @@ import 'package:fantasy_colegas_app/data/models/match_create.dart';
 import 'package:fantasy_colegas_app/core/api_client.dart';
 import 'package:fantasy_colegas_app/core/config/api_config.dart';
 import 'package:fantasy_colegas_app/data/models/player_match_stats_update.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fantasy_colegas_app/domain/services/auth_service.dart';
 
 class MatchRepository {
   final String _baseUrl = ApiConfig.baseUrl;
@@ -11,24 +11,25 @@ class MatchRepository {
   ApiClient _client(String token) => ApiClient(baseUrl: _baseUrl, token: token);
 
   Future<T> _executeWithAuth<T>(Future<T> Function(String token) action) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('jwt_token');
+    final token = await AuthService().getToken();
     if (token == null) {
       throw Exception('User not authenticated');
     }
     return action(token);
   }
 
-  Future<List<Match>> getUpcomingMatches() async {
+  Future<List<Match>> getUpcomingMatches(int leagueId) async { // <--- Recibe ID
     return _executeWithAuth((token) async {
-      final List<dynamic> jsonList = await _client(token).get('matches/upcoming');
+      // Añadimos ?leagueId=... a la URL
+      final List<dynamic> jsonList = await _client(token).get('matches/upcoming?leagueId=$leagueId');
       return jsonList.map((json) => Match.fromJson(json)).toList();
     });
   }
 
-  Future<List<Match>> getPastMatches() async {
+  Future<List<Match>> getPastMatches(int leagueId) async { // <--- Recibe ID
     return _executeWithAuth((token) async {
-      final List<dynamic> jsonList = await _client(token).get('matches/past');
+      // Añadimos ?leagueId=... a la URL
+      final List<dynamic> jsonList = await _client(token).get('matches/past?leagueId=$leagueId');
       return jsonList.map((json) => Match.fromJson(json)).toList();
     });
   }

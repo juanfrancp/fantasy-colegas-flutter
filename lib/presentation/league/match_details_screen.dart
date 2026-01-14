@@ -1,12 +1,12 @@
 import 'package:fantasy_colegas_app/data/models/league.dart';
 import 'package:fantasy_colegas_app/data/models/match.dart';
-import 'package:fantasy_colegas_app/domain/services/match_service.dart'; // Importa el servicio
+import 'package:fantasy_colegas_app/domain/services/match_service.dart';
+import 'package:fantasy_colegas_app/presentation/league/enter_match_results_screen.dart'; // <--- IMPORTA ESTO
 import 'package:flutter/material.dart';
 import 'package:fantasy_colegas_app/core/config/app_colors.dart';
 import 'package:fantasy_colegas_app/presentation/league/widgets/past_match_view.dart';
 import 'package:fantasy_colegas_app/presentation/league/widgets/upcoming_match_view.dart';
 
-// CAMBIO 1: Ahora es StatefulWidget
 class MatchDetailsScreen extends StatefulWidget {
   final Match match;
   final bool isAdmin;
@@ -28,22 +28,18 @@ class MatchDetailsScreen extends StatefulWidget {
 class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
   final MatchService _matchService = MatchService();
   
-  // Variable para guardar el estado actual del partido
   late Match _currentMatch;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    // Inicializamos con los datos que nos pasan por parámetro
     _currentMatch = widget.match;
   }
 
-  // ESTA ES LA FUNCIÓN QUE RECARGA LOS DATOS
   Future<void> _loadMatchDetails() async {
     setState(() => _isLoading = true);
     try {
-      // Pedimos al backend el partido actualizado por ID
       final updatedMatch = await _matchService.getMatch(_currentMatch.id);
       
       if (mounted) {
@@ -62,14 +58,38 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
     }
   }
 
+  // Función para navegar a la edición de resultados
+  Future<void> _navigateToEditResults() async {
+    final bool? resultUpdated = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EnterMatchResultsScreen(match: _currentMatch),
+      ),
+    );
+
+    // Si devuelve true, significa que se guardaron cambios -> recargamos
+    if (resultUpdated == true) {
+      _loadMatchDetails();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.isUpcoming ? 'Partido Programado' : 'Resultado del Partido'),
         backgroundColor: AppColors.primaryAccent,
+        foregroundColor: AppColors.pureWhite, // Asegura contraste
         actions: [
-          // Opción extra: Botón manual de recargar
+          // --- BOTÓN DE MODIFICAR RESULTADO (Solo Admins y Partidos Pasados) ---
+          if (widget.isAdmin && !widget.isUpcoming)
+            IconButton(
+              icon: const Icon(Icons.edit),
+              tooltip: 'Modificar Resultado',
+              onPressed: _navigateToEditResults,
+            ),
+            
+          // Botón manual de recargar
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadMatchDetails,
@@ -81,15 +101,14 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
           ? const Center(child: CircularProgressIndicator())
           : widget.isUpcoming
               ? UpcomingMatchView(
-                  match: _currentMatch, // Usamos _currentMatch, no widget.match
+                  match: _currentMatch,
                   isAdmin: widget.isAdmin,
                   league: widget.league,
                 )
               : PastMatchView(
-                  match: _currentMatch, // Usamos _currentMatch
+                  match: _currentMatch,
                   isAdmin: widget.isAdmin,
                   onMatchUpdated: () {
-                    // Aquí llamamos a nuestra función
                     _loadMatchDetails(); 
                   },
                 ),

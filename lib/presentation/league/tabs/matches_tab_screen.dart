@@ -46,8 +46,8 @@ class _MatchesTabScreenState extends State<MatchesTabScreen> {
     try {
       // Llamadas concurrentes para más eficiencia
       final results = await Future.wait([
-        _matchService.getUpcomingMatches(),
-        _matchService.getPastMatches(),
+        _matchService.getUpcomingMatches(widget.league.id),
+        _matchService.getPastMatches(widget.league.id),
       ]);
       if (!mounted) return;
 
