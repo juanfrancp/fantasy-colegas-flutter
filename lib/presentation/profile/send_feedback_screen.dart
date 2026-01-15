@@ -70,7 +70,8 @@ class _SendFeedbackScreenState extends State<SendFeedbackScreen> {
               
               // Selector de Tipo
               DropdownButtonFormField<String>(
-                value: _selectedType,
+                // CAMBIO AQUÍ: Usamos initialValue en lugar de value
+                initialValue: _selectedType,
                 dropdownColor: AppColors.secondaryAccent,
                 style: const TextStyle(color: AppColors.lightSurface),
                 decoration: const InputDecoration(

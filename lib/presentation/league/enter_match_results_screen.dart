@@ -46,7 +46,6 @@ class _EnterMatchResultsScreenState extends State<EnterMatchResultsScreen> {
     _initializeControllers(widget.match.awayTeam.players);
   }
 
-  // --- MODIFICACIÓN CLAVE AQUÍ ---
   // Ahora inicializamos los controladores con los datos que vienen del Player (si existen)
   void _initializeControllers(List<Player> players) {
     for (var player in players) {
@@ -80,13 +79,25 @@ class _EnterMatchResultsScreenState extends State<EnterMatchResultsScreen> {
   void dispose() {
     _homeScoreController.dispose();
     _awayScoreController.dispose();
-    // Limpieza masiva de controladores
-    for (var c in _goalsControllers.values) c.dispose();
-    for (var c in _assistsControllers.values) c.dispose();
-    for (var c in _yellowCardControllers.values) c.dispose();
-    for (var c in _redCardControllers.values) c.dispose();
-    for (var c in _savesControllers.values) c.dispose();
-    for (var c in _concededControllers.values) c.dispose();
+    // Limpieza masiva de controladores con bloques {} añadidos
+    for (var c in _goalsControllers.values) {
+      c.dispose();
+    }
+    for (var c in _assistsControllers.values) {
+      c.dispose();
+    }
+    for (var c in _yellowCardControllers.values) {
+      c.dispose();
+    }
+    for (var c in _redCardControllers.values) {
+      c.dispose();
+    }
+    for (var c in _savesControllers.values) {
+      c.dispose();
+    }
+    for (var c in _concededControllers.values) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -364,7 +375,7 @@ class _EnterMatchResultsScreenState extends State<EnterMatchResultsScreen> {
                                         fontSize: 10)),
                                 Switch(
                                   value: _cleanSheetValues[player.id]!,
-                                  activeColor: AppColors.primaryAccent,
+                                  activeThumbColor: AppColors.primaryAccent, // CAMBIADO AQUÍ
                                   inactiveThumbColor: Colors.grey,
                                   inactiveTrackColor:
                                       Colors.grey.withValues(alpha: 0.3),
