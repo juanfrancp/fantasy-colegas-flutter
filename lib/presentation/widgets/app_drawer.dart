@@ -47,13 +47,16 @@ class _AppDrawerState extends State<AppDrawer> {
   }
 
   void _navigateToProfile() async {
-    Navigator.pop(context);
+    Navigator.pop(context); 
     await Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (context) => const ProfileScreen()));
-    setState(() {
-      _userFuture = _userService.getMe();
-    });
+    
+    if (mounted) { 
+      setState(() {
+        _userFuture = _userService.getMe();
+      });
+    }
   }
 
   void _navigateToLeague(League league) {
