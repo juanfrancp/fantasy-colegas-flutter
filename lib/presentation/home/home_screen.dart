@@ -115,7 +115,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
         final bool hasImage = league.image != null && league.image!.isNotEmpty;
         final String? fullImageUrl = hasImage
-            ? '${ApiConfig.serverUrl}${league.image}'
+            ? (league.image!.startsWith('http') 
+                ? league.image! 
+                : '${ApiConfig.serverUrl}${league.image}')
             : null;
 
         return Padding(

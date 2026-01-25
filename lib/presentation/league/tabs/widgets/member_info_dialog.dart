@@ -120,7 +120,9 @@ class _MemberInfoDialogState extends State<MemberInfoDialog> {
         widget.member.profileImageUrl != null &&
         widget.member.profileImageUrl!.isNotEmpty;
     final fullImageUrl = hasImage
-        ? '${ApiConfig.serverUrl}${widget.member.profileImageUrl}'
+        ? (widget.member.profileImageUrl!.startsWith('http') 
+            ? widget.member.profileImageUrl 
+            : '${ApiConfig.serverUrl}${widget.member.profileImageUrl}')
         : null;
 
     return AlertDialog(

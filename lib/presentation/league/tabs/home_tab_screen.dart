@@ -149,7 +149,9 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
     final league = widget.league;
     final hasImage = league.image != null && league.image!.isNotEmpty;
     final fullImageUrl = hasImage
-        ? '${ApiConfig.serverUrl}${league.image}'
+        ? (league.image!.startsWith('http') 
+            ? league.image! 
+            : '${ApiConfig.serverUrl}${league.image}')
         : null;
 
     return Scaffold(
@@ -326,7 +328,9 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
                         member.profileImageUrl != null &&
                         member.profileImageUrl!.isNotEmpty;
                     final fullMemberImageUrl = hasMemberImage
-                        ? '${ApiConfig.serverUrl}${member.profileImageUrl}'
+                        ? (member.profileImageUrl!.startsWith('http')
+                            ? member.profileImageUrl!
+                            : '${ApiConfig.serverUrl}${member.profileImageUrl}')
                         : null;
 
                     final bool isMemberAdmin = widget.league.admins.any(

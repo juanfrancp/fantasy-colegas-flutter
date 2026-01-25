@@ -98,7 +98,9 @@ class PlayerInfoDialog extends StatelessWidget {
 
     final hasImage = player.image != null && player.image!.isNotEmpty;
     final fullImageUrl = hasImage
-        ? '${ApiConfig.serverUrl}${player.image}'
+        ? (player.image!.startsWith('http') 
+            ? player.image! 
+            : '${ApiConfig.serverUrl}${player.image}')
         : null;
 
     return AlertDialog(

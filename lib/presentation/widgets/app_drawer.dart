@@ -144,7 +144,9 @@ class _AppDrawerState extends State<AppDrawer> {
                         backgroundColor: AppColors.lightSurface,
                         backgroundImage: hasImage
                             ? NetworkImage(
-                                '${ApiConfig.serverUrl}${user.profileImageUrl!}',
+                                user.profileImageUrl!.startsWith('http')
+                                    ? user.profileImageUrl!
+                                    : '${ApiConfig.serverUrl}${user.profileImageUrl!}',
                               )
                             : const AssetImage(
                                     'assets/images/default_profile.png',
@@ -213,7 +215,9 @@ class _AppDrawerState extends State<AppDrawer> {
                     final hasCustomImage =
                         league.image != null && league.image!.isNotEmpty;
                     final fullImageUrl = hasCustomImage
-                        ? '${ApiConfig.serverUrl}${league.image}'
+                        ? (league.image!.startsWith('http') 
+                            ? league.image! 
+                            : '${ApiConfig.serverUrl}${league.image}')
                         : null;
 
                     return ListTile(
@@ -280,7 +284,6 @@ class _AppDrawerState extends State<AppDrawer> {
           ),
           const Divider(color: AppColors.secondaryAccent),
 
-          // 3. AÑADIMOS EL ONTAP AQUÍ
           ListTile(
             leading: const Icon(
               Icons.email_rounded,
@@ -290,7 +293,7 @@ class _AppDrawerState extends State<AppDrawer> {
               'Envía tus comentarios',
               style: TextStyle(color: AppColors.lightSurface),
             ),
-            onTap: _navigateToSendFeedback, // <--- ESTO FALTABA
+            onTap: _navigateToSendFeedback,
           ),
 
           ListTile(

@@ -308,7 +308,9 @@ class _ManageLeagueScreenState extends State<ManageLeagueScreen> {
                               : (widget.league.image != null &&
                                         widget.league.image!.isNotEmpty
                                     ? Image.network(
-                                        '${ApiConfig.serverUrl}${widget.league.image}',
+                                        widget.league.image!.startsWith('http') 
+                                            ? widget.league.image! 
+                                            : '${ApiConfig.serverUrl}${widget.league.image}',
                                         width: 120,
                                         height: 120,
                                         fit: BoxFit.cover,

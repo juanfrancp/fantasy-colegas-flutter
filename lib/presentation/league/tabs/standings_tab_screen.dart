@@ -97,7 +97,9 @@ class _StandingsTabScreenState extends State<StandingsTabScreen> {
                   userStanding.profileImageUrl != null &&
                   userStanding.profileImageUrl!.isNotEmpty;
               final fullImageUrl = hasImage
-                  ? '${ApiConfig.serverUrl}${userStanding.profileImageUrl}'
+                  ? (userStanding.profileImageUrl!.startsWith('http')
+                      ? userStanding.profileImageUrl
+                      : '${ApiConfig.serverUrl}${userStanding.profileImageUrl}')
                   : null;
 
               return ListTile(

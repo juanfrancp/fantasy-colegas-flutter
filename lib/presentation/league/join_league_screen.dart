@@ -267,8 +267,10 @@ class _JoinLeagueScreenState extends State<JoinLeagueScreen> {
                           final hasCustomImage =
                               league.image != null && league.image!.isNotEmpty;
                           final fullImageUrl = hasCustomImage
-                              ? '${ApiConfig.serverUrl}${league.image}'
-                              : null;
+                              ? (league.image!.startsWith('http') 
+                                ? league.image! 
+                                : '${ApiConfig.serverUrl}${league.image}')
+                            : null;
 
                           return Card(
                             color: AppColors.darkBackground.withAlpha(200),

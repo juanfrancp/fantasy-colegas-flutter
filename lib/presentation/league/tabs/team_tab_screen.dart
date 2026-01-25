@@ -92,7 +92,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
               return PlayerPositionWidget(
                 playerName: player.name,
                 playerImageUrl: player.image != null
-                    ? '${ApiConfig.serverUrl}${player.image}'
+                    ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                     : null,
                 position: 'CAM',
                 positionBackgroundColor: AppColors.primaryAccent,
@@ -121,7 +121,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -149,7 +149,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -179,7 +179,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -209,7 +209,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -239,7 +239,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -268,7 +268,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -298,7 +298,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -328,7 +328,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -357,7 +357,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -387,7 +387,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -417,7 +417,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -447,7 +447,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -477,7 +477,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -507,7 +507,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -537,7 +537,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -567,7 +567,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -597,7 +597,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -627,7 +627,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -657,7 +657,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -687,7 +687,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -717,7 +717,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,
@@ -747,7 +747,7 @@ class _TeamTabScreenState extends State<TeamTabScreen> {
                 return PlayerPositionWidget(
                   playerName: player.name,
                   playerImageUrl: player.image != null
-                      ? '${ApiConfig.serverUrl}${player.image}'
+                      ? (player.image!.startsWith('http') ? player.image! : '${ApiConfig.serverUrl}${player.image}')
                       : null,
                   position: 'CAM',
                   positionBackgroundColor: AppColors.primaryAccent,

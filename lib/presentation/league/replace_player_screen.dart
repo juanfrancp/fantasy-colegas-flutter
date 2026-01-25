@@ -68,7 +68,9 @@ class _ReplacePlayerScreenState extends State<ReplacePlayerScreen> {
         widget.playerToReplace.image != null &&
         widget.playerToReplace.image!.isNotEmpty;
     final fullImageUrl = hasImage
-        ? '${ApiConfig.serverUrl}${widget.playerToReplace.image}'
+        ? (widget.playerToReplace.image!.startsWith('http') 
+            ? widget.playerToReplace.image! 
+            : '${ApiConfig.serverUrl}${widget.playerToReplace.image}')
         : null;
 
     return Scaffold(

@@ -96,7 +96,9 @@ class _EditPlayerScreenState extends State<EditPlayerScreen> {
       currentImageProvider = FileImage(_selectedImage!);
     } else if (widget.player.image != null && widget.player.image!.isNotEmpty) {
       currentImageProvider = NetworkImage(
-        '${ApiConfig.serverUrl}${widget.player.image}',
+          widget.player.image!.startsWith('http') 
+              ? widget.player.image! 
+              : '${ApiConfig.serverUrl}${widget.player.image}',
       );
     } else {
       currentImageProvider = const AssetImage(

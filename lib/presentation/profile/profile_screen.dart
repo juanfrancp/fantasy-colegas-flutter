@@ -233,13 +233,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 CircleAvatar(
                   radius: MediaQuery.of(context).size.width * 0.25,
                   backgroundImage:
-                      user.profileImageUrl != null &&
-                          user.profileImageUrl!.isNotEmpty
-                      ? NetworkImage(
-                          '${ApiConfig.serverUrl}${user.profileImageUrl}',
-                        )
-                      : const AssetImage('assets/images/default_profile.png')
-                            as ImageProvider,
+                    user.profileImageUrl != null && user.profileImageUrl!.isNotEmpty
+                    ? NetworkImage(
+                        user.profileImageUrl!.startsWith('http') 
+                            ? user.profileImageUrl! 
+                            : '${ApiConfig.serverUrl}${user.profileImageUrl}',
+                      )
+                    : const AssetImage('assets/images/default_profile.png') as ImageProvider,
                   backgroundColor: AppColors.lightSurface,
                 ),
                 const SizedBox(height: 8),

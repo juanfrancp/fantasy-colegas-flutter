@@ -31,8 +31,8 @@ class MyApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [
-        Locale('es', 'ES'), // Español
-        Locale('en', 'US'), // Inglés como opción de respaldo
+        Locale('es', 'ES'),
+        Locale('en', 'US'),
       ],
       home: const AuthCheckScreen(),
     );

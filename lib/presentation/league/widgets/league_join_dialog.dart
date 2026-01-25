@@ -148,7 +148,9 @@ class _LeagueJoinDialogState extends State<LeagueJoinDialog> {
     final hasCustomImage =
         widget.league.image != null && widget.league.image!.isNotEmpty;
     final String? fullImageUrl = hasCustomImage
-        ? '${ApiConfig.serverUrl}${widget.league.image}'
+        ? (widget.league.image!.startsWith('http') 
+            ? widget.league.image! 
+            : '${ApiConfig.serverUrl}${widget.league.image}')
         : null;
 
     return AlertDialog(
